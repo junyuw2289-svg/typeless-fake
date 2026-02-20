@@ -10,6 +10,9 @@ const electronAPI: ElectronAPI = {
   onRecordingStop: (callback: () => void) => {
     ipcRenderer.on(IPC_CHANNELS.RECORDING_STOP, () => callback());
   },
+  onRecordingCancel: (callback: () => void) => {
+    ipcRenderer.on(IPC_CHANNELS.RECORDING_CANCEL, () => callback());
+  },
   onStatusUpdate: (callback: (status: AppStatus) => void) => {
     ipcRenderer.on(IPC_CHANNELS.STATUS_UPDATE, (_event, status) => callback(status));
   },
@@ -21,6 +24,9 @@ const electronAPI: ElectronAPI = {
   },
   sendAudioData: (buffer: ArrayBuffer) => {
     ipcRenderer.send(IPC_CHANNELS.RECORDING_AUDIO_DATA, buffer);
+  },
+  cancelRecording: () => {
+    ipcRenderer.send(IPC_CHANNELS.RECORDING_CANCELLED);
   },
   getSettings: () => {
     return ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_GET);

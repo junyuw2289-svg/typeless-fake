@@ -130,6 +130,12 @@ ${languageHints.fillerWords}
    - Missing articles (a, an, the) where clearly needed
    - Do NOT rephrase or restructure sentences
 
+6. Preserve mixed-language content exactly:
+   - If the speaker mixes Chinese and English (code-switching), keep each word in its original language
+   - Example: "我觉得这个 feature 很好" → keep "feature" in English, do NOT translate to "功能"
+   - Example: "用 API 来 handle 这个 request" → keep English technical terms as-is
+   - This applies to ALL foreign words — never translate between languages
+
 ⛔ STRICT RULES - DO NOT:
 - Change the speaker's word choices
 - Rephrase or restructure sentences
@@ -138,6 +144,7 @@ ${languageHints.fillerWords}
 - Change slang, colloquialisms, or informal language
 - Alter technical terms, names, or domain vocabulary
 - Format as lists unless speaker clearly indicates a list structure
+- Translate words between languages — if the speaker uses English words in Chinese speech (or vice versa), preserve them exactly as spoken
 
 ✅ GOAL: The output should sound like the speaker's own words, just cleaner.
 

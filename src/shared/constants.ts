@@ -3,6 +3,8 @@ export const IPC_CHANNELS = {
   RECORDING_START: 'recording:start',
   RECORDING_STOP: 'recording:stop',
   RECORDING_AUDIO_DATA: 'recording:audio-data',
+  RECORDING_CANCEL: 'recording:cancel',         // main → renderer: cancel recording
+  RECORDING_CANCELLED: 'recording:cancelled',   // renderer → main: recording was cancelled
 
   // Transcription
   TRANSCRIPTION_START: 'transcription:start',

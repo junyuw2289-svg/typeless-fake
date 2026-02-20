@@ -29,8 +29,10 @@ export function createOverlayWindow(): BrowserWindow {
     },
   });
 
+  // 🔧 初始状态忽略鼠标事件（后续根据状态动态切换）
   overlay.setIgnoreMouseEvents(true);
   overlay.setVisibleOnAllWorkspaces(true);
+  overlay.setAlwaysOnTop(true, 'floating');
 
   // Load the same renderer but the overlay component will handle routing
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {

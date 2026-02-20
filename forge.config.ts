@@ -3,18 +3,54 @@ import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { MakerZIP } from '@electron-forge/maker-zip';
 import { MakerDeb } from '@electron-forge/maker-deb';
 import { MakerRpm } from '@electron-forge/maker-rpm';
+import { MakerDMG } from '@electron-forge/maker-dmg';
 import { VitePlugin } from '@electron-forge/plugin-vite';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
+import dotenv from 'dotenv';
+
+// 加载环境变量（用于代码签名和公证）
+dotenv.config();
 
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
+    appBundleId: 'com.yourname.typeless',
+    appCategoryType: 'public.app-category.productivity',
+    icon: './assets/icon.icns', // 你需要创建这个图标文件
+    extendInfo: {
+      NSMicrophoneUsageDescription: 'Typeless needs access to your microphone to record voice for transcription.',
+      NSAppleEventsUsageDescription: 'Typeless needs to send keystrokes to insert transcribed text into other applications.',
+    },
+    // 代码签名配置
+    osxSign: {
+      // 自动查找 Developer ID Application 证书
+      // 如果你有多个证书，可以指定完整名称：'Developer ID Application: YOUR NAME (TEAM_ID)'
+      identity: 'Developer ID Application',
+      'hardened-runtime': true,
+      entitlements: 'entitlements.plist',
+      'entitlements-inherit': 'entitlements.plist',
+    },
+    // 公证配置
+    osxNotarize: {
+      tool: 'notarytool',
+      appleId: process.env.APPLE_ID!,
+      appleIdPassword: process.env.APPLE_ID_PASSWORD!,
+      teamId: process.env.APPLE_TEAM_ID!,
+    },
   },
   rebuildConfig: {},
   makers: [
-    new MakerSquirrel({}),
+    // macOS DMG 安装包（推荐用于分发）
+    new MakerDMG({
+      format: 'ULFO',
+      icon: './assets/icon.icns',
+      name: 'Typeless',
+    }, ['darwin']),
+    // macOS ZIP 备用（用于自动更新）
     new MakerZIP({}, ['darwin']),
+    // Windows/Linux 保留
+    new MakerSquirrel({}),
     new MakerRpm({}),
     new MakerDeb({}),
   ],

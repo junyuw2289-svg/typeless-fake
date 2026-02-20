@@ -36,6 +36,12 @@ export class IPCHandler {
   private sendStatus(status: AppStatus): void {
     this.overlayWindow?.webContents.send(IPC_CHANNELS.STATUS_UPDATE, status);
     this.onStatusChange?.(status);
+
+    // Overlay interactivity for recording is managed in main.ts (shortcut callback).
+    // Here we only need to disable interactivity when leaving recording state.
+    if (this.overlayWindow && status !== 'recording') {
+      this.overlayWindow.setIgnoreMouseEvents(true);
+    }
   }
 
   register(): void {
@@ -86,6 +92,13 @@ export class IPCHandler {
           this.sendStatus('idle');
         }, 3000);
       }
+    });
+
+    // Handle cancel from renderer (X button clicked)
+    ipcMain.on(IPC_CHANNELS.RECORDING_CANCELLED, () => {
+      console.log('[IPC] Recording cancelled by user');
+      this.sendStatus('idle');
+      this.overlayWindow?.hide();
     });
 
     // Handle settings

@@ -94,3 +94,37 @@ html, body {
     transform: rotate(360deg);
   }
 }
+
+/* Cancel button (X) for recording */
+.cancel-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-left: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  -webkit-app-region: no-drag;
+  pointer-events: auto; /* 🔧 确保可以点击 */
+  z-index: 10; /* 🔧 确保在最上层 */
+  flex-shrink: 0; /* 🔧 防止被压缩 */
+}
+
+.cancel-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+  transform: scale(1.05);
+}
+
+.cancel-button:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.2);
+}

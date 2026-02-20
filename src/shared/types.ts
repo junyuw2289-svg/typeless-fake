@@ -10,10 +10,12 @@ export interface AppSettings {
 export interface ElectronAPI {
   onRecordingStart: (callback: () => void) => void;
   onRecordingStop: (callback: () => void) => void;
+  onRecordingCancel: (callback: () => void) => void;
   onStatusUpdate: (callback: (status: AppStatus) => void) => void;
   onTranscriptionResult: (callback: (text: string) => void) => void;
   onTranscriptionError: (callback: (error: string) => void) => void;
   sendAudioData: (buffer: ArrayBuffer) => void;
+  cancelRecording: () => void;
   getSettings: () => Promise<AppSettings>;
   setSettings: (settings: Partial<AppSettings>) => void;
 }

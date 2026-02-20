@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Typeless Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#2563EB", // Royal blue from the 'Upgrade' button
+              "primary-light": "#EFF6FF", // Very light blue for backgrounds
+              "background-light": "#F3F4F6", // Light gray background
+              "background-dark": "#111827", // Dark mode background
+              "surface-light": "#FFFFFF",
+              "surface-dark": "#1F2937",
+              "text-primary-light": "#111827",
+              "text-secondary-light": "#6B7280",
+              "text-primary-dark": "#F9FAFB",
+              "text-secondary-dark": "#9CA3AF",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+              sans: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.75rem", // 12px
+              'xl': "1rem", // 16px
+              '2xl': "1.5rem", // 24px
+            },
+            boxShadow: {
+              'soft': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03)',
+              'card': '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)',
+            }
+          },
+        },
+      };
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .gradient-blue {
+            background: linear-gradient(135deg, #E0F2FE 0%, #EFF6FF 100%);
+        }
+        .gradient-orange {
+            background: linear-gradient(135deg, #FFF7ED 0%, #FEF2F2 100%);
+        }::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D1D5DB;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9CA3AF;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #4B5563;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark transition-colors duration-200 h-screen overflow-hidden flex selection:bg-primary selection:text-white">
+<aside class="w-64 flex-shrink-0 flex flex-col h-full bg-[#F9FAFB] dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 p-4">
+<div class="flex items-center gap-2 mb-8 px-2">
+<div class="w-6 h-6 bg-black dark:bg-white rounded-md flex items-center justify-center text-white dark:text-black font-bold text-xs transform -rotate-12">
+<span class="transform rotate-12">T</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Typeless</h1>
+<span class="px-2 py-0.5 text-xs font-medium text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30 rounded-full">Pro Trial</span>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-icons-outlined text-[20px]">home</span>
+                Home
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-icons-outlined text-[20px]">history</span>
+                History
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-icons-outlined text-[20px]">book</span>
+                Dictionary
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-900 dark:text-white bg-gray-200 dark:bg-gray-800 rounded-lg transition-colors" href="#">
+<span class="material-icons-outlined text-[20px]">settings</span>
+                Settings
+            </a>
+</nav>
+<div class="mt-auto space-y-4">
+<div class="relative group">
+<button class="w-full flex items-center justify-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl py-2.5 px-4 shadow-sm hover:shadow-md transition-all">
+<span class="material-icons-outlined text-gray-600 dark:text-gray-400 text-lg">smartphone</span>
+<span class="text-sm font-semibold text-gray-800 dark:text-white">Get mobile app</span>
+</button>
+<div class="absolute -top-10 left-1/2 transform -translate-x-1/2 flex gap-2 opacity-50">
+<span class="material-icons-outlined text-gray-400 text-3xl">apple</span>
+<span class="material-icons-outlined text-gray-400 text-3xl">android</span>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+<div class="mb-3">
+<h3 class="text-sm font-semibold text-gray-900 dark:text-white">Pro Trial</h3>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="text-sm font-bold text-gray-900 dark:text-white">22</span>
+<span class="text-sm text-gray-500 dark:text-gray-400">of 30 days used</span>
+</div>
+<div class="w-full bg-gray-100 dark:bg-gray-700 h-1.5 rounded-full mt-2 overflow-hidden">
+<div class="bg-gray-900 dark:bg-gray-300 h-full rounded-full" style="width: 73%"></div>
+</div>
+</div>
+<p class="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
+                    Upgrade to Typeless Pro before your trial ends
+                </p>
+<button class="w-full bg-primary hover:bg-blue-700 text-white font-medium py-2 rounded-xl text-sm transition-colors shadow-sm">
+                    Upgrade
+                </button>
+</div>
+<div class="flex items-center justify-between px-1 pt-2">
+<button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+<span class="material-icons-outlined text-[20px]">account_circle</span>
+</button>
+<button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+<span class="material-icons-outlined text-[20px]">mail</span>
+</button>
+<button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+<span class="material-icons-outlined text-[20px]">settings</span>
+</button>
+<button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+<span class="material-icons-outlined text-[20px]">help_outline</span>
+</button>
+</div>
+</div>
+</aside>
+<main class="flex-1 h-full overflow-y-auto bg-white dark:bg-surface-dark rounded-tl-3xl shadow-2xl relative">
+<div class="max-w-5xl mx-auto p-8 lg:p-10">
+<header class="mb-10 flex justify-between items-start">
+<div>
+<h2 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Account &amp; Settings</h2>
+<p class="mt-2 text-gray-500 dark:text-gray-400">Manage your subscription, API keys, and app preferences.</p>
+</div>
+</header>
+<section class="mb-10">
+<div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-3xl p-6 shadow-sm">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="flex-1">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Monthly Usage</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Reset on the 1st of every month.</p>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between items-end mb-2">
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Dictation Time</span>
+<span class="text-sm font-bold text-gray-900 dark:text-white">45<span class="text-gray-400 font-normal">/100 hrs</span></span>
+</div>
+<div class="w-full bg-gray-100 dark:bg-gray-700 h-2.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full transition-all duration-500" style="width: 45%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex-shrink-0 md:border-l md:border-gray-100 dark:md:border-gray-700 md:pl-8 flex flex-col justify-center">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-icons-outlined text-green-500">verified</span>
+<span class="font-semibold text-gray-900 dark:text-white">Pro Plan Active</span>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-4 max-w-[200px]">Next billing date: November 24, 2023</p>
+<button class="text-sm font-medium text-primary hover:text-blue-700 dark:hover:text-blue-400 self-start">
+                                Manage Subscription →
+                            </button>
+</div>
+</div>
+</div>
+</section>
+<section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+<div class="rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-full bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-gray-800 dark:to-gray-800/50 border border-blue-100/50 dark:border-gray-700">
+<div class="relative z-10">
+<div class="flex items-start justify-between mb-4">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white">API Configuration</h3>
+<span class="material-icons-outlined text-blue-500 bg-white dark:bg-gray-700 p-2 rounded-xl shadow-sm">code</span>
+</div>
+<p class="text-sm text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                            Connect Typeless to your custom workflows using your personal API key.
+                        </p>
+<div class="bg-white/60 dark:bg-gray-900/50 backdrop-blur-sm rounded-xl p-3 mb-6 border border-white/50 dark:border-gray-600 flex items-center justify-between">
+<code class="text-xs font-mono text-gray-600 dark:text-gray-400 truncate pr-4">sk_live_51M...92x</code>
+<button class="text-gray-400 hover:text-primary transition-colors">
+<span class="material-icons-outlined text-sm">content_copy</span>
+</button>
+</div>
+</div>
+<div class="relative z-10 mt-auto">
+<button class="bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white text-sm font-semibold py-2 px-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-600 transition-all">
+                            Generate New Key
+                        </button>
+</div>
+<div class="absolute -right-8 -bottom-8 w-32 h-32 bg-blue-200/30 dark:bg-blue-900/20 rounded-full blur-2xl"></div>
+</div>
+<div class="rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-full bg-gradient-to-br from-orange-50 to-red-50/50 dark:from-gray-800 dark:to-gray-800/50 border border-orange-100/50 dark:border-gray-700">
+<div class="relative z-10">
+<div class="flex items-start justify-between mb-4">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white">App Preferences</h3>
+<span class="material-icons-outlined text-orange-500 bg-white dark:bg-gray-700 p-2 rounded-xl shadow-sm">tune</span>
+</div>
+<p class="text-sm text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                            Customize hotkeys, language models, and dictation behavior.
+                        </p>
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Auto-punctuation</span>
+<button class="w-11 h-6 bg-orange-500 rounded-full relative transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+<span class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform"></span>
+</button>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Sound feedback</span>
+<button class="w-11 h-6 bg-gray-200 dark:bg-gray-600 rounded-full relative transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+<span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform"></span>
+</button>
+</div>
+</div>
+</div>
+<div class="relative z-10 mt-6">
+<button class="bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white text-sm font-semibold py-2 px-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-600 transition-all">
+                            Configure
+                        </button>
+</div>
+<div class="absolute -right-8 -top-8 w-32 h-32 bg-orange-200/30 dark:bg-orange-900/20 rounded-full blur-2xl"></div>
+</div>
+</section>
+<section class="border-t border-gray-100 dark:border-gray-800 pt-8">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6">Profile Details</h3>
+<div class="space-y-4 max-w-2xl">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+<label class="text-sm font-medium text-gray-500 dark:text-gray-400">Email Address</label>
+<div class="md:col-span-2">
+<input class="w-full bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl text-sm px-4 py-2.5 focus:ring-primary focus:border-primary dark:text-white" readonly="" type="email" value="alex@typeless.ai"/>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+<label class="text-sm font-medium text-gray-500 dark:text-gray-400">Display Name</label>
+<div class="md:col-span-2">
+<input class="w-full bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded-xl text-sm px-4 py-2.5 focus:ring-primary focus:border-primary dark:text-white shadow-sm" type="text" value="Alex Smith"/>
+</div>
+</div>
+</div>
+<div class="mt-8 flex justify-end gap-3 max-w-2xl">
+<button class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Cancel</button>
+<button class="px-6 py-2 text-sm font-semibold text-white bg-gray-900 dark:bg-white dark:text-gray-900 rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 shadow-lg shadow-gray-200 dark:shadow-none transition-all">
+                        Save Changes
+                    </button>
+</div>
+</section>
+<div class="mt-12 text-xs text-gray-400 dark:text-gray-500 flex gap-2">
+<span>Version v1.0.2</span>
+<a class="underline hover:text-gray-600 dark:hover:text-gray-400" href="#">Check for updates</a>
+</div>
+</div>
+</main>
+
+</body></html>

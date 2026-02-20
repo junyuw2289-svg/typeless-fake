@@ -7,6 +7,7 @@ import { TrayManager } from './main/tray-manager';
 import { IPCHandler } from './main/ipc-handlers';
 import { createOverlayWindow } from './main/overlay-window';
 import { getConfig } from './main/config-store';
+import { IPC_CHANNELS } from './shared/constants';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -45,6 +46,9 @@ function initApp(): void {
     if (status === 'idle') {
       shortcutManager?.resetState();
     }
+    if (status !== 'recording') {
+      try { globalShortcut.unregister('Escape'); } catch { /* already unregistered */ }
+    }
   });
   ipcHandler.setOnRecordingEnded(() => {
     shortcutManager?.resetState();
@@ -55,10 +59,22 @@ function initApp(): void {
   // Create shortcut manager
   shortcutManager = new ShortcutManager(config.hotkey, (recording) => {
     if (recording) {
-      // Use showInactive() to display window WITHOUT stealing focus
       overlayWindow?.showInactive();
+
+      // Enable mouse events so the cancel (✕) button is clickable
+      overlayWindow?.setIgnoreMouseEvents(false);
+
+      // Register a temporary global ESC shortcut to cancel recording
+      // (global shortcut works even when overlay doesn't have focus)
+      globalShortcut.register('Escape', () => {
+        console.log('[Main] ESC pressed — cancelling recording');
+        overlayWindow?.webContents.send(IPC_CHANNELS.RECORDING_CANCEL);
+        try { globalShortcut.unregister('Escape'); } catch { /* noop */ }
+      });
+
       trayManager?.updateMenu('recording');
     } else {
+      try { globalShortcut.unregister('Escape'); } catch { /* noop */ }
       trayManager?.updateMenu('transcribing');
     }
   });
