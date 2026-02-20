@@ -48,13 +48,12 @@ export class AudioRecorder {
       }
     };
 
-    this.mediaRecorder.start(100);
+    this.mediaRecorder.start(50);  // 将缓冲窗口减少 50%
   }
 
   stop(): Promise<ArrayBuffer> {
     return new Promise((resolve, reject) => {
-      // Capture local references so the setTimeout closure cannot
-      // accidentally act on a different MediaRecorder instance.
+      const stopT0 = Date.now();
       const recorder = this.mediaRecorder;
       const chunks = this.chunks;
 
@@ -64,24 +63,37 @@ export class AudioRecorder {
       }
 
       recorder.onstop = async () => {
+        const blobStart = Date.now();
+        console.log(`[Timing][AudioRecorder] recorder.onstop fired: +${blobStart - stopT0}ms`);
         console.log(`[AudioRecorder] Stopped. Total chunks: ${chunks.length}`);
         const blob = new Blob(chunks, { type: 'audio/webm' });
         const buffer = await blob.arrayBuffer();
+        console.log(`[Timing][AudioRecorder] Blob→ArrayBuffer: +${Date.now() - blobStart}ms`);
         console.log(`[AudioRecorder] Final buffer size: ${buffer.byteLength} bytes`);
 
         this.releaseResources();
+        console.log(`[Timing][AudioRecorder] Total stop(): ${Date.now() - stopT0}ms`);
         resolve(buffer);
       };
 
+      console.log(`[Timing][AudioRecorder] Starting flush sequence...`);
       if (recorder.state === 'recording') {
         recorder.requestData();
+
+        setTimeout(() => {
+          if (recorder.state === 'recording') {
+            recorder.requestData();
+            console.log(`[Timing][AudioRecorder] Second requestData(): +${Date.now() - stopT0}ms`);
+          }
+        }, 100);
       }
 
       setTimeout(() => {
         if (recorder.state !== 'inactive') {
+          console.log(`[Timing][AudioRecorder] Calling recorder.stop(): +${Date.now() - stopT0}ms`);
           recorder.stop();
         }
-      }, 150);
+      }, 250);
     });
   }
 

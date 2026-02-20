@@ -7,37 +7,35 @@ import { MakerDMG } from '@electron-forge/maker-dmg';
 import { VitePlugin } from '@electron-forge/plugin-vite';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
-import dotenv from 'dotenv';
+// import dotenv from 'dotenv';
 
-// 加载环境变量（用于代码签名和公证）
-dotenv.config();
+// 本地开发不需要加载环境变量
+// dotenv.config();
 
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
-    appBundleId: 'com.yourname.typeless',
+    appBundleId: 'com.junyuwang.typeless',
     appCategoryType: 'public.app-category.productivity',
     icon: './assets/icon.icns', // 你需要创建这个图标文件
     extendInfo: {
       NSMicrophoneUsageDescription: 'Typeless needs access to your microphone to record voice for transcription.',
       NSAppleEventsUsageDescription: 'Typeless needs to send keystrokes to insert transcribed text into other applications.',
     },
-    // 代码签名配置
-    osxSign: {
-      // 自动查找 Developer ID Application 证书
-      // 如果你有多个证书，可以指定完整名称：'Developer ID Application: YOUR NAME (TEAM_ID)'
-      identity: 'Developer ID Application',
-      'hardened-runtime': true,
-      entitlements: 'entitlements.plist',
-      'entitlements-inherit': 'entitlements.plist',
-    },
-    // 公证配置
-    osxNotarize: {
-      tool: 'notarytool',
-      appleId: process.env.APPLE_ID!,
-      appleIdPassword: process.env.APPLE_ID_PASSWORD!,
-      teamId: process.env.APPLE_TEAM_ID!,
-    },
+    // 本地开发：禁用代码签名和公证
+    // 如果需要分发，取消注释下面的配置并配置环境变量
+    // osxSign: {
+    //   identity: 'Developer ID Application',
+    //   'hardened-runtime': true,
+    //   entitlements: 'entitlements.plist',
+    //   'entitlements-inherit': 'entitlements.plist',
+    // },
+    // osxNotarize: {
+    //   tool: 'notarytool',
+    //   appleId: process.env.APPLE_ID!,
+    //   appleIdPassword: process.env.APPLE_ID_PASSWORD!,
+    //   teamId: process.env.APPLE_TEAM_ID!,
+    // },
   },
   rebuildConfig: {},
   makers: [

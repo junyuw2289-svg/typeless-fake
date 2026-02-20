@@ -5,7 +5,7 @@ import { TranscriptionService } from './main/transcription-service';
 import { TextInjector } from './main/text-injector';
 import { TrayManager } from './main/tray-manager';
 import { IPCHandler } from './main/ipc-handlers';
-import { createOverlayWindow } from './main/overlay-window';
+import { createOverlayWindow, repositionOverlayTocursor } from './main/overlay-window';
 import { getConfig } from './main/config-store';
 import { IPC_CHANNELS } from './shared/constants';
 
@@ -59,10 +59,11 @@ function initApp(): void {
   // Create shortcut manager
   shortcutManager = new ShortcutManager(config.hotkey, (recording) => {
     if (recording) {
-      overlayWindow?.showInactive();
-
-      // Enable mouse events so the cancel (✕) button is clickable
-      overlayWindow?.setIgnoreMouseEvents(false);
+      if (overlayWindow) {
+        repositionOverlayTocursor(overlayWindow);
+        overlayWindow.showInactive();
+        overlayWindow.setIgnoreMouseEvents(false);
+      }
 
       // Register a temporary global ESC shortcut to cancel recording
       // (global shortcut works even when overlay doesn't have focus)

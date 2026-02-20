@@ -31,8 +31,7 @@ html, body {
   height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding-top: 8px;
+  align-items: center;
   background: transparent;
 }
 

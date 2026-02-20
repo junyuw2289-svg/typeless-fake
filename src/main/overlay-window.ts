@@ -5,15 +5,28 @@ import { OVERLAY_WIDTH, OVERLAY_HEIGHT } from '../shared/constants';
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 declare const MAIN_WINDOW_VITE_NAME: string;
 
+const BOTTOM_PADDING = 48;
+
+export function repositionOverlayTocursor(overlay: BrowserWindow): void {
+  const cursor = screen.getCursorScreenPoint();
+  const display = screen.getDisplayNearestPoint(cursor);
+  const { x: areaX, y: areaY, width: areaW, height: areaH } = display.workArea;
+
+  const x = Math.round(areaX + areaW / 2 - OVERLAY_WIDTH / 2);
+  const y = areaY + areaH - OVERLAY_HEIGHT - BOTTOM_PADDING;
+
+  overlay.setBounds({ x, y, width: OVERLAY_WIDTH, height: OVERLAY_HEIGHT });
+}
+
 export function createOverlayWindow(): BrowserWindow {
   const primaryDisplay = screen.getPrimaryDisplay();
-  const { width: screenWidth } = primaryDisplay.workAreaSize;
+  const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
 
   const overlay = new BrowserWindow({
     width: OVERLAY_WIDTH,
     height: OVERLAY_HEIGHT,
     x: Math.round(screenWidth / 2 - OVERLAY_WIDTH / 2),
-    y: 80,
+    y: screenHeight - OVERLAY_HEIGHT - BOTTOM_PADDING,
     frame: false,
     transparent: true,
     alwaysOnTop: true,

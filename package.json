@@ -6,7 +6,7 @@
   "main": ".vite/build/main.js",
   "private": true,
   "build": {
-    "appId": "com.yourname.typeless",
+    "appId": "com.junyuwang.typeless",
     "copyright": "Copyright © 2026 ${author}"
   },
   "scripts": {

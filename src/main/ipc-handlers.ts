@@ -11,6 +11,7 @@ export class IPCHandler {
   private overlayWindow: BrowserWindow | null = null;
   private onStatusChange: ((status: string) => void) | null = null;
   private onRecordingEnded: (() => void) | null = null;
+  private isTranscribing = false;
 
   constructor(
     transcriptionService: TranscriptionService,
@@ -46,8 +47,17 @@ export class IPCHandler {
 
   register(): void {
     // Handle audio data from renderer (after recording stops)
-    ipcMain.on(IPC_CHANNELS.RECORDING_AUDIO_DATA, async (_event, buffer: ArrayBuffer) => {
+    ipcMain.on(IPC_CHANNELS.RECORDING_AUDIO_DATA, async (_event, buffer: ArrayBuffer, stopInitiatedAt: number) => {
+      const ipcReceivedAt = Date.now();
+      console.log(`[Timing][IPC] Audio data received: +${ipcReceivedAt - stopInitiatedAt}ms from stop (IPC transit + flush)`);
       console.log('[IPC] Received audio data, size:', buffer.byteLength, 'bytes');
+
+      if (this.isTranscribing) {
+        console.log('[IPC] Already transcribing — ignoring duplicate audio data');
+        return;
+      }
+      this.isTranscribing = true;
+
       this.onRecordingEnded?.();
       this.sendStatus('transcribing');
 
@@ -55,24 +65,27 @@ export class IPCHandler {
         const config = getConfig();
         console.log('[IPC] Config loaded, API key exists:', !!config.apiKey, 'Polish enabled:', config.enablePolish);
         this.transcriptionService.updateApiKey(config.apiKey);
-        console.log('[IPC] Starting transcription...');
+
+        console.log(`[Timing][IPC] Starting transcription: +${Date.now() - stopInitiatedAt}ms from stop`);
         const text = await this.transcriptionService.transcribe(
           Buffer.from(buffer),
           config.language,
-          config.enablePolish
+          config.enablePolish,
+          stopInitiatedAt
         );
+        console.log(`[Timing][IPC] Transcription complete: +${Date.now() - stopInitiatedAt}ms from stop`);
         console.log('[IPC] Transcription result:', text);
 
         if (text && text.trim()) {
-          // Inject text into active app
-          console.log('[IPC] Injecting text:', text);
+          const injectStart = Date.now();
+          console.log(`[Timing][IPC] Injecting text: +${injectStart - stopInitiatedAt}ms from stop`);
           await this.textInjector.inject(text);
-          console.log('[IPC] Text injection complete');
+          console.log(`[Timing][IPC] Text injection done: +${Date.now() - stopInitiatedAt}ms from stop (inject took ${Date.now() - injectStart}ms)`);
 
           this.overlayWindow?.webContents.send(IPC_CHANNELS.TRANSCRIPTION_RESULT, text);
           this.sendStatus('done');
+          console.log(`[Timing][IPC] ===== Total pipeline: ${Date.now() - stopInitiatedAt}ms =====`);
 
-          // Hide overlay after showing "Done" for 1.5s
           setTimeout(() => {
             this.overlayWindow?.hide();
             this.sendStatus('idle');
@@ -84,6 +97,7 @@ export class IPCHandler {
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Transcription failed';
         console.error('Transcription error:', message);
+        console.log(`[Timing][IPC] Transcription FAILED: +${Date.now() - stopInitiatedAt}ms from stop`);
         this.overlayWindow?.webContents.send(IPC_CHANNELS.TRANSCRIPTION_ERROR, message);
         this.sendStatus('error');
 
@@ -91,6 +105,8 @@ export class IPCHandler {
           this.overlayWindow?.hide();
           this.sendStatus('idle');
         }, 3000);
+      } finally {
+        this.isTranscribing = false;
       }
     });
 

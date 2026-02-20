@@ -14,7 +14,16 @@ export const Overlay: React.FC = () => {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const autoStopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hardKillTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isCancellingRef = useRef<boolean>(false); // 🆕 取消标志
+  const isCancellingRef = useRef<boolean>(false);
+  const isStoppingRef = useRef<boolean>(false);
+
+  // Store handlers in refs so we can access latest version without re-registering listeners
+  // Initialize without values - the update effect will set them after handlers are defined
+  const handleStartRecordingRef = useRef<typeof handleStartRecording>();
+  const handleStopRecordingRef = useRef<typeof handleStopRecording>();
+  const handleCancelRecordingRef = useRef<typeof handleCancelRecording>();
+  const setStatusRef = useRef<typeof setStatus>();
+  const setErrorRef = useRef<typeof setError>();
 
   const clearRecordingTimers = useCallback(() => {
     if (autoStopTimerRef.current) {
@@ -58,27 +67,43 @@ export const Overlay: React.FC = () => {
   }, [setStatus, clearRecordingTimers]);
 
   const handleStopRecording = useCallback(async () => {
-    // 🆕 如果是取消操作，直接返回
     if (isCancellingRef.current) {
       console.log('[Stop] Skipping normal stop - recording was cancelled');
       return;
     }
 
+    if (isStoppingRef.current) {
+      console.log('[Stop] Already stopping - ignoring duplicate call');
+      return;
+    }
+    isStoppingRef.current = true;
+
+    const stopInitiatedAt = Date.now();
+    console.log(`[Timing] Stop initiated at ${stopInitiatedAt}`);
+
     clearRecordingTimers();
     try {
       const buffer = await audioRecorder.stop();
+      const flushDone = Date.now();
+      console.log(`[Timing] Audio flush + stop completed: ${flushDone - stopInitiatedAt}ms`);
+
       analyserRef.current = null;
       soundEffects.recordingStop();
       setStatus('transcribing');
 
-      window.electronAPI.sendAudioData(buffer);
+      console.log(`[Timing] Sending audio data to main process (${buffer.byteLength} bytes)...`);
+      window.electronAPI.sendAudioData(buffer, stopInitiatedAt);
+      console.log(`[Timing] IPC send call returned: ${Date.now() - stopInitiatedAt}ms from stop`);
     } catch (err) {
       console.error('Failed to stop recording:', err);
       setError('Recording failed');
+    } finally {
+      isStoppingRef.current = false;
     }
   }, [setStatus, setError, clearRecordingTimers]);
 
   const handleStartRecording = useCallback(async () => {
+    isStoppingRef.current = false;
     try {
       await audioRecorder.start();
       analyserRef.current = audioRecorder.getAnalyser();
@@ -107,6 +132,15 @@ export const Overlay: React.FC = () => {
     }
   }, [setStatus, setError, handleStopRecording, clearRecordingTimers]);
 
+  // Update refs when handlers change (so listeners always call the latest version)
+  useEffect(() => {
+    handleStartRecordingRef.current = handleStartRecording;
+    handleStopRecordingRef.current = handleStopRecording;
+    handleCancelRecordingRef.current = handleCancelRecording;
+    setStatusRef.current = setStatus;
+    setErrorRef.current = setError;
+  }, [handleStartRecording, handleStopRecording, handleCancelRecording, setStatus, setError]);
+
   // 🆕 ESC 键监听
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -123,32 +157,33 @@ export const Overlay: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [status, handleCancelRecording]);
 
+  // Register IPC listeners ONCE on mount (using refs to access latest handlers)
   useEffect(() => {
     const disposers = [
       window.electronAPI.onRecordingStart(() => {
-        handleStartRecording();
+        handleStartRecordingRef.current?.();
       }),
       window.electronAPI.onRecordingStop(() => {
-        handleStopRecording();
+        handleStopRecordingRef.current?.();
       }),
       window.electronAPI.onRecordingCancel(() => {
         console.log('[Overlay] Cancel signal received from main (ESC)');
-        handleCancelRecording();
+        handleCancelRecordingRef.current?.();
       }),
       window.electronAPI.onStatusUpdate((newStatus) => {
-        setStatus(newStatus);
+        setStatusRef.current?.(newStatus);
       }),
       window.electronAPI.onTranscriptionResult((text) => {
         console.log('Transcription result:', text);
       }),
       window.electronAPI.onTranscriptionError((errorMsg) => {
         soundEffects.error();
-        setError(errorMsg);
+        setErrorRef.current?.(errorMsg);
       }),
     ];
 
     return () => disposers.forEach((dispose) => dispose());
-  }, [handleStartRecording, handleStopRecording, handleCancelRecording, setStatus, setError]);
+  }, []); // Empty deps - register once only
 
   // Don't render anything when idle
   if (status === 'idle') {

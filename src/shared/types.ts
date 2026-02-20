@@ -16,7 +16,7 @@ export interface ElectronAPI {
   onStatusUpdate: (callback: (status: AppStatus) => void) => Disposer;
   onTranscriptionResult: (callback: (text: string) => void) => Disposer;
   onTranscriptionError: (callback: (error: string) => void) => Disposer;
-  sendAudioData: (buffer: ArrayBuffer) => void;
+  sendAudioData: (buffer: ArrayBuffer, stopInitiatedAt: number) => void;
   cancelRecording: () => void;
   getSettings: () => Promise<AppSettings>;
   setSettings: (settings: Partial<AppSettings>) => void;

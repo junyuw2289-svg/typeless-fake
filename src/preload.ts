@@ -34,8 +34,8 @@ const electronAPI: ElectronAPI = {
     ipcRenderer.on(IPC_CHANNELS.TRANSCRIPTION_ERROR, handler);
     return () => { ipcRenderer.removeListener(IPC_CHANNELS.TRANSCRIPTION_ERROR, handler); };
   },
-  sendAudioData: (buffer: ArrayBuffer) => {
-    ipcRenderer.send(IPC_CHANNELS.RECORDING_AUDIO_DATA, buffer);
+  sendAudioData: (buffer: ArrayBuffer, stopInitiatedAt: number) => {
+    ipcRenderer.send(IPC_CHANNELS.RECORDING_AUDIO_DATA, buffer, stopInitiatedAt);
   },
   cancelRecording: () => {
     ipcRenderer.send(IPC_CHANNELS.RECORDING_CANCELLED);

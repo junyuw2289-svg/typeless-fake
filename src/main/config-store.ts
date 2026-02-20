@@ -13,13 +13,15 @@ const store = new Store<StoreSchema>({
     hotkey: DEFAULT_HOTKEY,
     apiKey: '',
     language: '',
-    enablePolish: true, // Enable AI polish by default
+    enablePolish: false, // Set to true to enable AI polish (adds ~0.5-1s latency)
   },
 });
 
 if (store.get('language') === 'zh') {
   store.set('language', '');
 }
+
+store.set('enablePolish', true);
 
 export function getConfig(): StoreSchema {
   return {
