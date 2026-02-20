@@ -7,13 +7,15 @@ export interface AppSettings {
   enablePolish: boolean; // Enable AI polish after transcription
 }
 
+type Disposer = () => void;
+
 export interface ElectronAPI {
-  onRecordingStart: (callback: () => void) => void;
-  onRecordingStop: (callback: () => void) => void;
-  onRecordingCancel: (callback: () => void) => void;
-  onStatusUpdate: (callback: (status: AppStatus) => void) => void;
-  onTranscriptionResult: (callback: (text: string) => void) => void;
-  onTranscriptionError: (callback: (error: string) => void) => void;
+  onRecordingStart: (callback: () => void) => Disposer;
+  onRecordingStop: (callback: () => void) => Disposer;
+  onRecordingCancel: (callback: () => void) => Disposer;
+  onStatusUpdate: (callback: (status: AppStatus) => void) => Disposer;
+  onTranscriptionResult: (callback: (text: string) => void) => Disposer;
+  onTranscriptionError: (callback: (error: string) => void) => Disposer;
   sendAudioData: (buffer: ArrayBuffer) => void;
   cancelRecording: () => void;
   getSettings: () => Promise<AppSettings>;

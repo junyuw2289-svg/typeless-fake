@@ -28,12 +28,34 @@ export class TranscriptionService {
     try {
       fs.writeFileSync(tempPath, audioBuffer);
 
-      // Step 1: Speech-to-text transcription
-      const transcription = await this.client.audio.transcriptions.create({
-        file: fs.createReadStream(tempPath),
-        model: 'gpt-4o-transcribe',
-        language: language || undefined,
-      });
+      const fileStats = fs.statSync(tempPath);
+      const header = audioBuffer.subarray(0, 4);
+      console.log(
+        `[Transcription] Temp file: ${tempPath}, size: ${fileStats.size}, header: [${Array.from(header).map(b => '0x' + b.toString(16).padStart(2, '0')).join(', ')}]`
+      );
+
+      // Validate WebM magic bytes (EBML header: 0x1A 0x45 0xDF 0xA3)
+      if (header[0] !== 0x1a || header[1] !== 0x45 || header[2] !== 0xdf || header[3] !== 0xa3) {
+        console.warn('[Transcription] WARNING: File does not have valid WebM/EBML header!');
+      }
+
+      // Step 1: Speech-to-text transcription (try gpt-4o-transcribe, fallback to whisper-1)
+      let transcription;
+      try {
+        transcription = await this.client.audio.transcriptions.create({
+          file: fs.createReadStream(tempPath),
+          model: 'gpt-4o-transcribe',
+          language: language || undefined,
+        });
+      } catch (primaryError) {
+        const errMsg = primaryError instanceof Error ? primaryError.message : String(primaryError);
+        console.warn(`[Transcription] gpt-4o-transcribe failed: ${errMsg}, falling back to whisper-1`);
+        transcription = await this.client.audio.transcriptions.create({
+          file: fs.createReadStream(tempPath),
+          model: 'whisper-1',
+          language: language || undefined,
+        });
+      }
 
       const rawText = transcription.text;
       console.log('[Transcription] Raw text:', rawText);

@@ -124,31 +124,30 @@ export const Overlay: React.FC = () => {
   }, [status, handleCancelRecording]);
 
   useEffect(() => {
-    window.electronAPI.onRecordingStart(() => {
-      handleStartRecording();
-    });
+    const disposers = [
+      window.electronAPI.onRecordingStart(() => {
+        handleStartRecording();
+      }),
+      window.electronAPI.onRecordingStop(() => {
+        handleStopRecording();
+      }),
+      window.electronAPI.onRecordingCancel(() => {
+        console.log('[Overlay] Cancel signal received from main (ESC)');
+        handleCancelRecording();
+      }),
+      window.electronAPI.onStatusUpdate((newStatus) => {
+        setStatus(newStatus);
+      }),
+      window.electronAPI.onTranscriptionResult((text) => {
+        console.log('Transcription result:', text);
+      }),
+      window.electronAPI.onTranscriptionError((errorMsg) => {
+        soundEffects.error();
+        setError(errorMsg);
+      }),
+    ];
 
-    window.electronAPI.onRecordingStop(() => {
-      handleStopRecording();
-    });
-
-    window.electronAPI.onRecordingCancel(() => {
-      console.log('[Overlay] Cancel signal received from main (ESC)');
-      handleCancelRecording();
-    });
-
-    window.electronAPI.onStatusUpdate((newStatus) => {
-      setStatus(newStatus);
-    });
-
-    window.electronAPI.onTranscriptionResult((text) => {
-      console.log('Transcription result:', text);
-    });
-
-    window.electronAPI.onTranscriptionError((errorMsg) => {
-      soundEffects.error();
-      setError(errorMsg);
-    });
+    return () => disposers.forEach((dispose) => dispose());
   }, [handleStartRecording, handleStopRecording, handleCancelRecording, setStatus, setError]);
 
   // Don't render anything when idle

@@ -5,22 +5,34 @@ import type { AppStatus } from './shared/types';
 
 const electronAPI: ElectronAPI = {
   onRecordingStart: (callback: () => void) => {
-    ipcRenderer.on(IPC_CHANNELS.RECORDING_START, () => callback());
+    const handler = () => callback();
+    ipcRenderer.on(IPC_CHANNELS.RECORDING_START, handler);
+    return () => { ipcRenderer.removeListener(IPC_CHANNELS.RECORDING_START, handler); };
   },
   onRecordingStop: (callback: () => void) => {
-    ipcRenderer.on(IPC_CHANNELS.RECORDING_STOP, () => callback());
+    const handler = () => callback();
+    ipcRenderer.on(IPC_CHANNELS.RECORDING_STOP, handler);
+    return () => { ipcRenderer.removeListener(IPC_CHANNELS.RECORDING_STOP, handler); };
   },
   onRecordingCancel: (callback: () => void) => {
-    ipcRenderer.on(IPC_CHANNELS.RECORDING_CANCEL, () => callback());
+    const handler = () => callback();
+    ipcRenderer.on(IPC_CHANNELS.RECORDING_CANCEL, handler);
+    return () => { ipcRenderer.removeListener(IPC_CHANNELS.RECORDING_CANCEL, handler); };
   },
   onStatusUpdate: (callback: (status: AppStatus) => void) => {
-    ipcRenderer.on(IPC_CHANNELS.STATUS_UPDATE, (_event, status) => callback(status));
+    const handler = (_event: Electron.IpcRendererEvent, status: AppStatus) => callback(status);
+    ipcRenderer.on(IPC_CHANNELS.STATUS_UPDATE, handler);
+    return () => { ipcRenderer.removeListener(IPC_CHANNELS.STATUS_UPDATE, handler); };
   },
   onTranscriptionResult: (callback: (text: string) => void) => {
-    ipcRenderer.on(IPC_CHANNELS.TRANSCRIPTION_RESULT, (_event, text) => callback(text));
+    const handler = (_event: Electron.IpcRendererEvent, text: string) => callback(text);
+    ipcRenderer.on(IPC_CHANNELS.TRANSCRIPTION_RESULT, handler);
+    return () => { ipcRenderer.removeListener(IPC_CHANNELS.TRANSCRIPTION_RESULT, handler); };
   },
   onTranscriptionError: (callback: (error: string) => void) => {
-    ipcRenderer.on(IPC_CHANNELS.TRANSCRIPTION_ERROR, (_event, error) => callback(error));
+    const handler = (_event: Electron.IpcRendererEvent, error: string) => callback(error);
+    ipcRenderer.on(IPC_CHANNELS.TRANSCRIPTION_ERROR, handler);
+    return () => { ipcRenderer.removeListener(IPC_CHANNELS.TRANSCRIPTION_ERROR, handler); };
   },
   sendAudioData: (buffer: ArrayBuffer) => {
     ipcRenderer.send(IPC_CHANNELS.RECORDING_AUDIO_DATA, buffer);
