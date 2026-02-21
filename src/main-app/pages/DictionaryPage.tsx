@@ -1,89 +1,134 @@
-import React, { useState } from 'react';
-
-const SAMPLE_WORDS: string[] = [
-  'Skylight',
-  'reveal',
-  'Xin',
-  'claude code',
-  'online markdown render',
-  'Scene',
-  'SceneItems',
-  'Anvar Kayumov',
-  'Yixuan Ye',
-  'UnLockView',
-  '消重',
-  'comment',
-  '结构体',
-  '边界条件',
-  'renyue',
-  'ERD',
-  '欣一些',
-  'FI-CN',
-  'GetFeedrecall',
-  'RPC',
-  'tphase-out',
-  'feed recall',
-  'view Status',
-  'mixank',
-];
+import React, { useState, useEffect, useRef } from 'react';
+import type { DictionaryWord } from '../../shared/types';
 
 const DictionaryPage: React.FC = () => {
-  const [activeTab] = useState<'all'>('all');
+  const [words, setWords] = useState<DictionaryWord[]>([]);
+  const [isAdding, setIsAdding] = useState(false);
+  const [newWord, setNewWord] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const loadWords = async () => {
+    const list = await window.electronAPI.dictionaryList();
+    setWords(list);
+  };
+
+  useEffect(() => {
+    loadWords();
+  }, []);
+
+  useEffect(() => {
+    if (isAdding && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isAdding]);
+
+  const handleAdd = async () => {
+    const trimmed = newWord.trim();
+    if (!trimmed) return;
+    const added = await window.electronAPI.dictionaryAdd(trimmed);
+    setWords(prev => [added, ...prev]);
+    setNewWord('');
+    setIsAdding(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    await window.electronAPI.dictionaryDelete(id);
+    setWords(prev => prev.filter(w => w.id !== id));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleAdd();
+    } else if (e.key === 'Escape') {
+      setNewWord('');
+      setIsAdding(false);
+    }
+  };
 
   return (
     <div className="flex flex-1 flex-col gap-[32px] p-[48px]">
-      {/* Subheading */}
-      <span className="font-heading text-[14px] font-normal text-[var(--text-primary)]">
-        Degine Your Own Work In Fixtionary
-      </span>
-
       {/* Header with title + new word button */}
-      <div className="flex w-[216px] items-center justify-center gap-[16px]">
+      <div className="flex items-center gap-[16px]">
         <h1 className="font-heading text-[32px] font-normal text-[var(--text-primary)]">
           Dictionary
         </h1>
-        <button className="flex h-[44px] items-center justify-center rounded-[22px] bg-[var(--text-primary)] p-[12px] text-[14px] font-sans text-white">
+        <button
+          onClick={() => setIsAdding(true)}
+          className="flex h-[44px] items-center justify-center rounded-[22px] bg-[var(--text-primary)] px-[20px] py-[12px] font-sans text-[14px] text-white"
+        >
           New word
         </button>
       </div>
 
-      {/* Filter Row */}
-      <div className="flex w-full items-center">
-        <div className="flex gap-[8px]">
+      {/* Inline add input */}
+      {isAdding && (
+        <div className="flex items-center gap-[12px]">
+          <input
+            ref={inputRef}
+            type="text"
+            value={newWord}
+            onChange={e => setNewWord(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Type a word or phrase…"
+            className="h-[44px] w-[320px] rounded-[12px] border border-[var(--border-light)] bg-[var(--bg-white)] px-[16px] font-sans text-[14px] text-[var(--text-primary)] outline-none focus:border-[var(--accent-orange)]"
+          />
           <button
-            className={`flex items-center justify-center rounded-full px-[10px] py-[10px] text-[13px] font-sans ${
-              activeTab === 'all'
-                ? 'bg-[var(--text-primary)] text-white'
-                : 'bg-[var(--border-light)] text-[var(--text-primary)]'
-            }`}
+            onClick={handleAdd}
+            className="flex h-[44px] items-center justify-center rounded-[22px] bg-[var(--text-primary)] px-[20px] font-sans text-[14px] text-white"
           >
-            All
+            Add
+          </button>
+          <button
+            onClick={() => { setNewWord(''); setIsAdding(false); }}
+            className="flex h-[44px] items-center justify-center rounded-[22px] bg-[var(--border-light)] px-[20px] font-sans text-[14px] text-[var(--text-primary)]"
+          >
+            Cancel
           </button>
         </div>
-        <div className="flex-1" />
-        <button className="flex h-[40px] w-[40px] items-center justify-center rounded-[20px] bg-[var(--border-light)]">
-          <span className="text-[16px]">🔍</span>
-        </button>
-      </div>
+      )}
+
+      {/* Empty state */}
+      {words.length === 0 && !isAdding && (
+        <div className="flex flex-col items-center justify-center gap-[16px] py-[64px]">
+          <span className="text-[48px]">✨</span>
+          <p className="font-sans text-[16px] text-[var(--text-secondary)]">
+            Add words and phrases to improve transcription accuracy.
+          </p>
+          <button
+            onClick={() => setIsAdding(true)}
+            className="flex h-[44px] items-center justify-center rounded-[22px] bg-[var(--text-primary)] px-[20px] font-sans text-[14px] text-white"
+          >
+            Add your first word
+          </button>
+        </div>
+      )}
 
       {/* Words Grid */}
-      <div className="flex w-full flex-col gap-[16px]">
-        {Array.from({ length: Math.ceil(SAMPLE_WORDS.length / 3) }, (_, rowIdx) => (
-          <div key={rowIdx} className="flex w-full gap-[20px]">
-            {SAMPLE_WORDS.slice(rowIdx * 3, rowIdx * 3 + 3).map((word, colIdx) => (
-              <div
-                key={`${rowIdx}-${colIdx}`}
-                className="flex w-[310px] items-center gap-[8px]"
-              >
-                <span className="text-[14px] text-[var(--accent-green)]">✨</span>
-                <span className="text-[14px] font-sans text-[var(--text-primary)]">
-                  {word}
-                </span>
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
+      {words.length > 0 && (
+        <div className="flex w-full flex-col gap-[16px]">
+          {Array.from({ length: Math.ceil(words.length / 3) }, (_, rowIdx) => (
+            <div key={rowIdx} className="flex w-full gap-[20px]">
+              {words.slice(rowIdx * 3, rowIdx * 3 + 3).map(word => (
+                <div
+                  key={word.id}
+                  className="group flex w-[310px] items-center gap-[8px]"
+                >
+                  <span className="text-[14px] text-[var(--accent-green)]">✨</span>
+                  <span className="flex-1 font-sans text-[14px] text-[var(--text-primary)]">
+                    {word.word}
+                  </span>
+                  <button
+                    onClick={() => handleDelete(word.id)}
+                    className="flex h-[24px] w-[24px] items-center justify-center rounded-full text-[12px] text-[var(--text-secondary)] opacity-0 transition-opacity hover:bg-[var(--border-light)] group-hover:opacity-100"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

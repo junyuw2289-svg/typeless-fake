@@ -2,6 +2,7 @@ import { ipcMain, BrowserWindow } from 'electron';
 import { IPC_CHANNELS } from '../shared/constants';
 import { AuthService } from './auth-service';
 import { HistoryService } from './history-service';
+import { DictionaryService } from './dictionary-service';
 import { getSupabaseClient } from './supabase-client';
 import type {
   AuthSignUpRequest,
@@ -12,6 +13,7 @@ import type {
 
 const authService = new AuthService();
 const historyService = new HistoryService();
+const dictionaryService = new DictionaryService();
 
 export function registerAuthIPC(getMainWindow: () => BrowserWindow | null): void {
   // --- Auth ---
@@ -84,6 +86,19 @@ export function registerAuthIPC(getMainWindow: () => BrowserWindow | null): void
 
     return { success: !error, error: error?.message };
   });
+
+  // --- Dictionary ---
+  ipcMain.handle(IPC_CHANNELS.DICTIONARY_LIST, async () => {
+    return dictionaryService.list();
+  });
+
+  ipcMain.handle(IPC_CHANNELS.DICTIONARY_ADD, async (_event, req: { word: string }) => {
+    return dictionaryService.add(req.word);
+  });
+
+  ipcMain.handle(IPC_CHANNELS.DICTIONARY_DELETE, async (_event, req: { id: string }) => {
+    return { success: dictionaryService.delete(req.id) };
+  });
 }
 
-export { authService, historyService };
+export { authService, historyService, dictionaryService };

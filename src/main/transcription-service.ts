@@ -18,7 +18,8 @@ export class TranscriptionService {
     audioBuffer: Buffer,
     language?: string,
     enablePolish: boolean = true,
-    stopInitiatedAt: number = Date.now()
+    stopInitiatedAt: number = Date.now(),
+    dictionaryWords?: string[]
   ): Promise<string> {
     if (!this.client) {
       throw new Error('OpenAI API key not configured. Please set your API key in settings.');
@@ -47,6 +48,12 @@ export class TranscriptionService {
         console.warn('[Transcription] WARNING: File does not have valid WebM/EBML header!');
       }
 
+      // Build prompt from dictionary words
+      const prompt = dictionaryWords?.length ? dictionaryWords.join(', ') : undefined;
+      if (prompt) {
+        console.log(`[Transcription] Using dictionary prompt (${dictionaryWords!.length} words): ${prompt.substring(0, 100)}...`);
+      }
+
       // Step 1: Speech-to-text transcription (try gpt-4o-transcribe, fallback to whisper-1)
       let transcription;
       let usedModel: string;
@@ -57,6 +64,7 @@ export class TranscriptionService {
           file: fs.createReadStream(tempPath),
           model: 'gpt-4o-transcribe',
           language: language || undefined,
+          prompt,
         });
         usedModel = 'gpt-4o-transcribe';
         t(`<<< gpt-4o-transcribe API call done (took ${Date.now() - gptStart}ms)`);
@@ -71,6 +79,7 @@ export class TranscriptionService {
           file: fs.createReadStream(tempPath),
           model: 'whisper-1',
           language: language || undefined,
+          prompt,
         });
         usedModel = 'whisper-1';
         t(`<<< whisper-1 API call done (took ${Date.now() - whisperStart}ms)`);
