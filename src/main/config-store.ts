@@ -1,11 +1,14 @@
 import Store from 'electron-store';
 import { DEFAULT_HOTKEY } from '../shared/constants';
+import type { PolishProvider } from '../shared/types';
 
 interface StoreSchema {
   hotkey: string;
   apiKey: string;
   language: string;
   enablePolish: boolean;
+  polishProvider: PolishProvider;
+  polishApiKey: string;
 }
 
 const store = new Store<StoreSchema>({
@@ -14,6 +17,8 @@ const store = new Store<StoreSchema>({
     apiKey: '',
     language: '',
     enablePolish: false, // Set to true to enable AI polish (adds ~0.5-1s latency)
+    polishProvider: 'openai',
+    polishApiKey: '',
   },
 });
 
@@ -30,6 +35,8 @@ export function getConfig(): StoreSchema {
     apiKey: store.get('apiKey'),
     language: store.get('language'),
     enablePolish: store.get('enablePolish'),
+    polishProvider: store.get('polishProvider'),
+    polishApiKey: store.get('polishApiKey'),
   };
 }
 

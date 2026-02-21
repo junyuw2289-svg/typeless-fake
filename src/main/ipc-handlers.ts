@@ -74,8 +74,9 @@ export class IPCHandler {
 
       try {
         const config = getConfig();
-        console.log('[IPC] Config loaded, API key exists:', !!config.apiKey, 'Polish enabled:', config.enablePolish);
+        console.log('[IPC] Config loaded, API key exists:', !!config.apiKey, 'Polish enabled:', config.enablePolish, 'Polish provider:', config.polishProvider);
         this.transcriptionService.updateApiKey(config.apiKey);
+        this.transcriptionService.updatePolishConfig(config.polishProvider, config.polishApiKey);
 
         const dictionaryWords = dictionaryService.getAllWords();
         console.log(`[IPC] Dictionary words for prompt: ${dictionaryWords.length}`);

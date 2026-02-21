@@ -1,10 +1,14 @@
 export type AppStatus = 'idle' | 'recording' | 'transcribing' | 'done' | 'error';
 
+export type PolishProvider = 'openai' | 'grok' | 'groq';
+
 export interface AppSettings {
   hotkey: string;
   apiKey: string;
   language: string;
   enablePolish: boolean; // Enable AI polish after transcription
+  polishProvider: PolishProvider; // Which provider to use for polish
+  polishApiKey: string; // API key for non-OpenAI polish providers (Grok, Groq, etc.)
 }
 
 // Auth types

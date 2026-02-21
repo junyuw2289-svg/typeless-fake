@@ -18,8 +18,7 @@ export class TranscriptionService {
     audioBuffer: Buffer,
     language?: string,
     enablePolish: boolean = true,
-    stopInitiatedAt: number = Date.now(),
-    dictionaryWords?: string[]
+    stopInitiatedAt: number = Date.now()
   ): Promise<string> {
     if (!this.client) {
       throw new Error('OpenAI API key not configured. Please set your API key in settings.');
@@ -48,12 +47,6 @@ export class TranscriptionService {
         console.warn('[Transcription] WARNING: File does not have valid WebM/EBML header!');
       }
 
-      // Build prompt from dictionary words
-      const prompt = dictionaryWords?.length ? dictionaryWords.join(', ') : undefined;
-      if (prompt) {
-        console.log(`[Transcription] Using dictionary prompt (${dictionaryWords!.length} words): ${prompt.substring(0, 100)}...`);
-      }
-
       // Step 1: Speech-to-text transcription (try gpt-4o-transcribe, fallback to whisper-1)
       let transcription;
       let usedModel: string;
@@ -64,7 +57,6 @@ export class TranscriptionService {
           file: fs.createReadStream(tempPath),
           model: 'gpt-4o-transcribe',
           language: language || undefined,
-          prompt,
         });
         usedModel = 'gpt-4o-transcribe';
         t(`<<< gpt-4o-transcribe API call done (took ${Date.now() - gptStart}ms)`);
@@ -79,14 +71,13 @@ export class TranscriptionService {
           file: fs.createReadStream(tempPath),
           model: 'whisper-1',
           language: language || undefined,
-          prompt,
         });
         usedModel = 'whisper-1';
         t(`<<< whisper-1 API call done (took ${Date.now() - whisperStart}ms)`);
       }
 
       const rawText = transcription.text;
-      console.log(`[Transcription] Raw text (model=${usedModel}):`, rawText);
+      console.log(`[Transcription] [Before polish] (model=${usedModel}):`, rawText);
 
       // Step 2: Light polish (minimal intervention) - only if enabled
       if (enablePolish) {
@@ -94,10 +85,11 @@ export class TranscriptionService {
         t('>>> gpt-4o-mini polish API call start');
         const polishedText = await this.polish(rawText, language);
         t(`<<< gpt-4o-mini polish API call done (took ${Date.now() - polishStart}ms)`);
-        console.log('[Transcription] Polished text:', polishedText);
+        console.log('[Transcription] [After polish]:', polishedText);
         return polishedText;
       }
 
+      console.log('[Transcription] [Polish disabled, using raw text]');
       return rawText;
     } finally {
       try {

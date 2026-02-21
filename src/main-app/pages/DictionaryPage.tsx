@@ -8,8 +8,12 @@ const DictionaryPage: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const loadWords = async () => {
-    const list = await window.electronAPI.dictionaryList();
-    setWords(list);
+    try {
+      const list = await window.electronAPI.dictionaryList();
+      setWords(list);
+    } catch (err) {
+      console.error('[Dictionary] Failed to load words:', err);
+    }
   };
 
   useEffect(() => {
@@ -25,15 +29,23 @@ const DictionaryPage: React.FC = () => {
   const handleAdd = async () => {
     const trimmed = newWord.trim();
     if (!trimmed) return;
-    const added = await window.electronAPI.dictionaryAdd(trimmed);
-    setWords(prev => [added, ...prev]);
-    setNewWord('');
-    setIsAdding(false);
+    try {
+      const added = await window.electronAPI.dictionaryAdd(trimmed);
+      setWords(prev => [added, ...prev]);
+      setNewWord('');
+      setIsAdding(false);
+    } catch (err) {
+      console.error('[Dictionary] Failed to add word:', err);
+    }
   };
 
   const handleDelete = async (id: string) => {
-    await window.electronAPI.dictionaryDelete(id);
-    setWords(prev => prev.filter(w => w.id !== id));
+    try {
+      await window.electronAPI.dictionaryDelete(id);
+      setWords(prev => prev.filter(w => w.id !== id));
+    } catch (err) {
+      console.error('[Dictionary] Failed to delete word:', err);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

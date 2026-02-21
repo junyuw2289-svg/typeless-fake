@@ -22,6 +22,8 @@ export const useAppStore = create<AppState>((set) => ({
     apiKey: '',
     language: '',
     enablePolish: true,
+    polishProvider: 'openai',
+    polishApiKey: '',
   },
 
   setStatus: (status) => set({ status, error: status === 'error' ? undefined : null }),

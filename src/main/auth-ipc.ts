@@ -16,13 +16,19 @@ const authService = new AuthService();
 const historyService = new HistoryService();
 const dictionaryService = new DictionaryService();
 
+/** Remove any existing handler before registering — safe for hot-reload. */
+function safeHandle(channel: string, handler: (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any) {
+  ipcMain.removeHandler(channel);
+  ipcMain.handle(channel, handler);
+}
+
 export function registerAuthIPC(getMainWindow: () => BrowserWindow | null): void {
   // --- Auth ---
-  ipcMain.handle(IPC_CHANNELS.AUTH_SIGN_UP, async (_event, req: AuthSignUpRequest) => {
+  safeHandle(IPC_CHANNELS.AUTH_SIGN_UP, async (_event, req: AuthSignUpRequest) => {
     return authService.signUp(req.email, req.password, req.displayName);
   });
 
-  ipcMain.handle(IPC_CHANNELS.AUTH_SIGN_IN, async (_event, req: AuthSignInRequest) => {
+  safeHandle(IPC_CHANNELS.AUTH_SIGN_IN, async (_event, req: AuthSignInRequest) => {
     const result = await authService.signIn(req.email, req.password);
     if (result.success) {
       getMainWindow()?.webContents.send(IPC_CHANNELS.AUTH_STATE_CHANGED, { user: result.user });
@@ -30,11 +36,11 @@ export function registerAuthIPC(getMainWindow: () => BrowserWindow | null): void
     return result;
   });
 
-  ipcMain.handle(IPC_CHANNELS.AUTH_SIGN_IN_GOOGLE, async () => {
+  safeHandle(IPC_CHANNELS.AUTH_SIGN_IN_GOOGLE, async () => {
     return authService.signInWithGoogle();
   });
 
-  ipcMain.handle(IPC_CHANNELS.AUTH_SIGN_OUT, async () => {
+  safeHandle(IPC_CHANNELS.AUTH_SIGN_OUT, async () => {
     const result = await authService.signOut();
     if (result.success) {
       getMainWindow()?.webContents.send(IPC_CHANNELS.AUTH_STATE_CHANGED, { user: null });
@@ -42,24 +48,24 @@ export function registerAuthIPC(getMainWindow: () => BrowserWindow | null): void
     return result;
   });
 
-  ipcMain.handle(IPC_CHANNELS.AUTH_GET_SESSION, async () => {
+  safeHandle(IPC_CHANNELS.AUTH_GET_SESSION, async () => {
     return authService.getSession();
   });
 
   // --- History ---
-  ipcMain.handle(IPC_CHANNELS.HISTORY_LIST, async (_event, req: HistoryListRequest) => {
+  safeHandle(IPC_CHANNELS.HISTORY_LIST, async (_event, req: HistoryListRequest) => {
     return historyService.list(req.page, req.pageSize);
   });
 
-  ipcMain.handle(IPC_CHANNELS.HISTORY_DELETE, async (_event, req: { id: string }) => {
+  safeHandle(IPC_CHANNELS.HISTORY_DELETE, async (_event, req: { id: string }) => {
     return historyService.delete(req.id);
   });
 
-  ipcMain.handle(IPC_CHANNELS.HISTORY_GET_DIR, async () => {
+  safeHandle(IPC_CHANNELS.HISTORY_GET_DIR, async () => {
     return historyService.getHistoryDir();
   });
 
-  ipcMain.handle(IPC_CHANNELS.HISTORY_SET_DIR, async (_event, req: { dir: string }) => {
+  safeHandle(IPC_CHANNELS.HISTORY_SET_DIR, async (_event, req: { dir: string }) => {
     try {
       if (!fs.existsSync(req.dir)) {
         fs.mkdirSync(req.dir, { recursive: true });
@@ -72,12 +78,12 @@ export function registerAuthIPC(getMainWindow: () => BrowserWindow | null): void
   });
 
   // --- Stats ---
-  ipcMain.handle(IPC_CHANNELS.STATS_GET, async () => {
+  safeHandle(IPC_CHANNELS.STATS_GET, async () => {
     return historyService.getStats();
   });
 
   // --- Profile ---
-  ipcMain.handle(IPC_CHANNELS.PROFILE_GET, async () => {
+  safeHandle(IPC_CHANNELS.PROFILE_GET, async () => {
     const supabase = getSupabaseClient();
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return null;
@@ -96,7 +102,7 @@ export function registerAuthIPC(getMainWindow: () => BrowserWindow | null): void
     };
   });
 
-  ipcMain.handle(IPC_CHANNELS.PROFILE_UPDATE, async (_event, req: ProfileUpdateRequest) => {
+  safeHandle(IPC_CHANNELS.PROFILE_UPDATE, async (_event, req: ProfileUpdateRequest) => {
     const supabase = getSupabaseClient();
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return { success: false, error: 'Not authenticated' };
@@ -110,15 +116,15 @@ export function registerAuthIPC(getMainWindow: () => BrowserWindow | null): void
   });
 
   // --- Dictionary ---
-  ipcMain.handle(IPC_CHANNELS.DICTIONARY_LIST, async () => {
+  safeHandle(IPC_CHANNELS.DICTIONARY_LIST, async () => {
     return dictionaryService.list();
   });
 
-  ipcMain.handle(IPC_CHANNELS.DICTIONARY_ADD, async (_event, req: { word: string }) => {
+  safeHandle(IPC_CHANNELS.DICTIONARY_ADD, async (_event, req: { word: string }) => {
     return dictionaryService.add(req.word);
   });
 
-  ipcMain.handle(IPC_CHANNELS.DICTIONARY_DELETE, async (_event, req: { id: string }) => {
+  safeHandle(IPC_CHANNELS.DICTIONARY_DELETE, async (_event, req: { id: string }) => {
     return { success: dictionaryService.delete(req.id) };
   });
 }
