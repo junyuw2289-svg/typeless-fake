@@ -6,8 +6,8 @@ import { WaveformAnimation } from './WaveformAnimation';
 
 const audioRecorder = new AudioRecorder();
 
-const MAX_RECORDING_MS = 60 * 1000;
-const HARD_KILL_MS = 5 * 60 * 1000;
+const MAX_RECORDING_MS = 10 * 60 * 1000;
+const HARD_KILL_MS = 15 * 60 * 1000;
 
 export const Overlay: React.FC = () => {
   const { status, setStatus, error, setError } = useAppStore();
@@ -110,21 +110,19 @@ export const Overlay: React.FC = () => {
       soundEffects.recordingStart();
       setStatus('recording');
 
-      // Auto-stop after 1 minute
       autoStopTimerRef.current = setTimeout(() => {
-        console.log('[Timer] Auto-stopping recording after 1 minute');
+        console.log('[Timer] Auto-stopping recording after 10 minutes');
         handleStopRecording();
       }, MAX_RECORDING_MS);
 
-      // Hard kill safety net after 5 minutes
       hardKillTimerRef.current = setTimeout(() => {
-        console.log('[Timer] Hard kill recording after 5 minutes');
+        console.log('[Timer] Hard kill recording after 15 minutes');
         if (audioRecorder.isRecording()) {
           audioRecorder.stop().catch(() => {});
         }
         analyserRef.current = null;
         soundEffects.error();
-        setError('Recording killed: exceeded 5 min limit');
+        setError('Recording killed: exceeded 15 min limit');
       }, HARD_KILL_MS);
     } catch (err) {
       console.error('Failed to start recording:', err);
