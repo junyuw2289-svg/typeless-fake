@@ -23,7 +23,9 @@ export const useAppStore = create<AppState>((set) => ({
     language: '',
     enablePolish: true,
     polishProvider: 'openai',
-    polishApiKey: '',
+    grokApiKey: '',
+    groqApiKey: '',
+    polishModel: 'llama-3.3-70b-versatile',
   },
 
   setStatus: (status) => set({ status, error: status === 'error' ? undefined : null }),

@@ -4,11 +4,9 @@ import { execFile } from 'node:child_process';
 export class TextInjector {
   async inject(text: string): Promise<void> {
     clipboard.writeText(text);
-    console.log('[TextInjector] Text written to clipboard:', text);
 
     try {
       await this.simulatePaste();
-      console.log('[TextInjector] Paste command executed');
     } catch (error) {
       console.error('[TextInjector] Paste failed:', error);
     }
@@ -26,7 +24,6 @@ export class TextInjector {
                 console.error('[TextInjector] osascript error:', error.message);
                 reject(error);
               } else {
-                console.log('[TextInjector] Paste command successful');
                 resolve();
               }
             }

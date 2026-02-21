@@ -83,6 +83,13 @@ function initApp(): void {
     console.log('WARNING: No API key configured!');
   }
 
+  // Initialize polish provider
+  transcriptionService.updatePolishConfig(config.polishProvider, {
+    grokApiKey: config.grokApiKey,
+    groqApiKey: config.groqApiKey,
+  }, config.polishModel);
+  console.log('Polish provider:', config.polishProvider);
+
   // Create overlay window
   overlayWindow = createOverlayWindow();
   ipcHandler.setOverlayWindow(overlayWindow);

@@ -59,10 +59,6 @@ export class IPCHandler {
   register(): void {
     // Handle audio data from renderer (after recording stops)
     ipcMain.on(IPC_CHANNELS.RECORDING_AUDIO_DATA, async (_event, buffer: ArrayBuffer, stopInitiatedAt: number) => {
-      const ipcReceivedAt = Date.now();
-      console.log(`[Timing][IPC] Audio data received: +${ipcReceivedAt - stopInitiatedAt}ms from stop (IPC transit + flush)`);
-      console.log('[IPC] Received audio data, size:', buffer.byteLength, 'bytes');
-
       if (this.isTranscribing) {
         console.log('[IPC] Already transcribing — ignoring duplicate audio data');
         return;
@@ -74,14 +70,14 @@ export class IPCHandler {
 
       try {
         const config = getConfig();
-        console.log('[IPC] Config loaded, API key exists:', !!config.apiKey, 'Polish enabled:', config.enablePolish, 'Polish provider:', config.polishProvider);
         this.transcriptionService.updateApiKey(config.apiKey);
-        this.transcriptionService.updatePolishConfig(config.polishProvider, config.polishApiKey);
+        this.transcriptionService.updatePolishConfig(config.polishProvider, {
+          grokApiKey: config.grokApiKey,
+          groqApiKey: config.groqApiKey,
+        }, config.polishModel);
 
         const dictionaryWords = dictionaryService.getAllWords();
-        console.log(`[IPC] Dictionary words for prompt: ${dictionaryWords.length}`);
 
-        console.log(`[Timing][IPC] Starting transcription: +${Date.now() - stopInitiatedAt}ms from stop`);
         const text = await this.transcriptionService.transcribe(
           Buffer.from(buffer),
           config.language,
@@ -89,14 +85,10 @@ export class IPCHandler {
           stopInitiatedAt,
           dictionaryWords
         );
-        console.log(`[Timing][IPC] Transcription complete: +${Date.now() - stopInitiatedAt}ms from stop`);
-        console.log('[IPC] Transcription result:', text);
-
         if (text && text.trim()) {
           const injectStart = Date.now();
-          console.log(`[Timing][IPC] Injecting text: +${injectStart - stopInitiatedAt}ms from stop`);
           await this.textInjector.inject(text);
-          console.log(`[Timing][IPC] Text injection done: +${Date.now() - stopInitiatedAt}ms from stop (inject took ${Date.now() - injectStart}ms)`);
+          const injectMs = Date.now() - injectStart;
 
           const durationSeconds = this.recordingStartedAt
             ? parseFloat(((stopInitiatedAt - this.recordingStartedAt) / 1000).toFixed(2))
@@ -116,7 +108,7 @@ export class IPCHandler {
 
           this.overlayWindow?.webContents.send(IPC_CHANNELS.TRANSCRIPTION_RESULT, text);
           this.sendStatus('done');
-          console.log(`[Timing][IPC] ===== Total pipeline: ${Date.now() - stopInitiatedAt}ms =====`);
+          console.log(`[pipeline: ${Date.now() - stopInitiatedAt}ms | inject: ${injectMs}ms]`);
 
           setTimeout(() => {
             this.overlayWindow?.hide();

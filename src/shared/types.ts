@@ -4,11 +4,13 @@ export type PolishProvider = 'openai' | 'grok' | 'groq';
 
 export interface AppSettings {
   hotkey: string;
-  apiKey: string;
+  apiKey: string; // OpenAI API key (for transcription + polish when provider='openai')
   language: string;
   enablePolish: boolean; // Enable AI polish after transcription
   polishProvider: PolishProvider; // Which provider to use for polish
-  polishApiKey: string; // API key for non-OpenAI polish providers (Grok, Groq, etc.)
+  grokApiKey: string; // Grok API key (used when provider='grok')
+  groqApiKey: string; // Groq API key (used when provider='groq')
+  polishModel: string; // Which model to use for polish (e.g. 'llama-3.3-70b-versatile')
 }
 
 // Auth types
