@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout from './layouts/AppLayout';
 import AuthLayout from './layouts/AuthLayout';
@@ -10,8 +10,16 @@ import DictionaryPage from './pages/DictionaryPage';
 import AccountPage from './pages/AccountPage';
 import AccountProfilePage from './pages/AccountProfilePage';
 import UnderConstruction from './components/UnderConstruction';
+import { useAuthStore } from './stores/auth-store';
 
 const App: React.FC = () => {
+  useEffect(() => {
+    const unsubscribe = window.electronAPI.onAuthStateChanged((newUser) => {
+      useAuthStore.getState().setUser(newUser);
+    });
+    return unsubscribe;
+  }, []);
+
   return (
     <HashRouter>
       <Routes>

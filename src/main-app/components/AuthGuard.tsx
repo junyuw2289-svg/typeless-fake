@@ -9,13 +9,6 @@ const AuthGuard: React.FC = () => {
     checkSession();
   }, [checkSession]);
 
-  useEffect(() => {
-    const unsubscribe = window.electronAPI.onAuthStateChanged((newUser) => {
-      useAuthStore.getState().setUser(newUser);
-    });
-    return unsubscribe;
-  }, []);
-
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center bg-[var(--bg-page)]">

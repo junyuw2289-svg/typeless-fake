@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/auth-store';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { signIn, signInWithGoogle, error, isLoading } = useAuthStore();
+  const { signIn, signInWithGoogle, user, error, isLoading } = useAuthStore();
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleGoogleClick = async () => {
     await signInWithGoogle();

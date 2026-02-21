@@ -61,7 +61,7 @@ const AccountProfilePage: React.FC = () => {
       <div className="flex justify-end pb-[24px]">
         <button
           onClick={handleSignOut}
-          className="flex h-[40px] w-[110px] items-center justify-center rounded-[20px] border border-[#d4d2cc] bg-transparent font-sans text-[14px] text-[var(--text-primary)]"
+          className="group flex h-[40px] w-[110px] items-center justify-center rounded-[20px] border border-red-400/60 bg-transparent font-sans text-[14px] text-red-500 transition-all duration-200 hover:bg-red-500 hover:text-white hover:border-red-500 hover:shadow-lg hover:shadow-red-500/25 active:scale-95 active:shadow-md active:shadow-red-500/20"
         >
           Sign out
         </button>

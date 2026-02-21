@@ -57,8 +57,15 @@ export class IPCHandler {
   }
 
   register(): void {
+    // Remove any stale handlers first (prevents duplicates from Vite HMR rebuilds)
+    ipcMain.removeAllListeners(IPC_CHANNELS.RECORDING_AUDIO_DATA);
+    ipcMain.removeAllListeners(IPC_CHANNELS.RECORDING_CANCELLED);
+    ipcMain.removeAllListeners(IPC_CHANNELS.SETTINGS_SET);
+    ipcMain.removeHandler(IPC_CHANNELS.SETTINGS_GET);
+
     // Handle audio data from renderer (after recording stops)
     ipcMain.on(IPC_CHANNELS.RECORDING_AUDIO_DATA, async (_event, buffer: ArrayBuffer, stopInitiatedAt: number) => {
+      console.log(`[IPC] RECORDING_AUDIO_DATA received (${(buffer as any).byteLength ?? '?'} bytes, isTranscribing=${this.isTranscribing})`);
       if (this.isTranscribing) {
         console.log('[IPC] Already transcribing — ignoring duplicate audio data');
         return;
