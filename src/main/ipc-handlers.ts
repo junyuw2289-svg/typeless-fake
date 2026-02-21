@@ -10,9 +10,11 @@ export class IPCHandler {
   private transcriptionService: TranscriptionService;
   private textInjector: TextInjector;
   private overlayWindow: BrowserWindow | null = null;
+  private getMainWindow: (() => BrowserWindow | null) | null = null;
   private onStatusChange: ((status: string) => void) | null = null;
   private onRecordingEnded: (() => void) | null = null;
   private isTranscribing = false;
+  private recordingStartedAt: number | null = null;
 
   constructor(
     transcriptionService: TranscriptionService,
@@ -26,6 +28,10 @@ export class IPCHandler {
     this.overlayWindow = window;
   }
 
+  setGetMainWindow(getter: () => BrowserWindow | null): void {
+    this.getMainWindow = getter;
+  }
+
   setOnStatusChange(callback: (status: string) => void): void {
     this.onStatusChange = callback;
   }
@@ -33,6 +39,10 @@ export class IPCHandler {
   /** Called when audio data arrives, meaning recording has ended (user-initiated or auto-stopped) */
   setOnRecordingEnded(callback: () => void): void {
     this.onRecordingEnded = callback;
+  }
+
+  markRecordingStarted(): void {
+    this.recordingStartedAt = Date.now();
   }
 
   private sendStatus(status: AppStatus): void {
@@ -83,12 +93,20 @@ export class IPCHandler {
           await this.textInjector.inject(text);
           console.log(`[Timing][IPC] Text injection done: +${Date.now() - stopInitiatedAt}ms from stop (inject took ${Date.now() - injectStart}ms)`);
 
+          const durationSeconds = this.recordingStartedAt
+            ? parseFloat(((stopInitiatedAt - this.recordingStartedAt) / 1000).toFixed(2))
+            : null;
+          this.recordingStartedAt = null;
+
           // Save to history (fire-and-forget, don't block main flow)
           historyService.save({
             original_text: text,
             optimized_text: config.enablePolish ? text : null,
             app_context: null,
-            duration_seconds: null,
+            duration_seconds: durationSeconds,
+          }).then(() => {
+            // Notify main window so Dashboard/History can refresh
+            this.getMainWindow?.()?.webContents.send(IPC_CHANNELS.HISTORY_UPDATED);
           }).catch((err) => console.error('[History] Failed to save:', err));
 
           this.overlayWindow?.webContents.send(IPC_CHANNELS.TRANSCRIPTION_RESULT, text);
@@ -122,6 +140,7 @@ export class IPCHandler {
     // Handle cancel from renderer (X button clicked)
     ipcMain.on(IPC_CHANNELS.RECORDING_CANCELLED, () => {
       console.log('[IPC] Recording cancelled by user');
+      this.recordingStartedAt = null;
       this.sendStatus('idle');
       this.overlayWindow?.hide();
     });

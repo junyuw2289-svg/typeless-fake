@@ -32,6 +32,14 @@ export const IPC_CHANNELS = {
   // History (renderer → main, invoke)
   HISTORY_LIST: 'history:list',
   HISTORY_DELETE: 'history:delete',
+  HISTORY_GET_DIR: 'history:get-dir',
+  HISTORY_SET_DIR: 'history:set-dir',
+
+  // Stats (renderer → main, invoke)
+  STATS_GET: 'stats:get',
+
+  // History updated (main → renderer, push)
+  HISTORY_UPDATED: 'history:updated',
 
   // Profile (renderer → main, invoke)
   PROFILE_GET: 'profile:get',

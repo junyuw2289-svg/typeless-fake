@@ -62,6 +62,12 @@ export interface HistoryDeleteResult {
   error?: string;
 }
 
+export interface TranscriptionStatsResult {
+  totalWords: number;
+  totalCount: number;
+  totalDurationSeconds: number;
+}
+
 // Profile types
 export interface UserProfile {
   displayName: string;
@@ -103,6 +109,12 @@ export interface ElectronAPI {
   // History
   historyList: (page: number, pageSize: number) => Promise<HistoryListResult>;
   historyDelete: (id: string) => Promise<HistoryDeleteResult>;
+  historyGetDir: () => Promise<string>;
+  historySetDir: (dir: string) => Promise<{ success: boolean; error?: string }>;
+
+  // Stats
+  statsGet: () => Promise<TranscriptionStatsResult>;
+  onHistoryUpdated: (callback: () => void) => Disposer;
 
   // Profile
   profileGet: () => Promise<UserProfile | null>;

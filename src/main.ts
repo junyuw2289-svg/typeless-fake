@@ -86,6 +86,7 @@ function initApp(): void {
   // Create overlay window
   overlayWindow = createOverlayWindow();
   ipcHandler.setOverlayWindow(overlayWindow);
+  ipcHandler.setGetMainWindow(getMainWindow);
   ipcHandler.setOnStatusChange((status) => {
     trayManager?.updateMenu(status);
     if (status === 'idle') {
@@ -126,6 +127,7 @@ function initApp(): void {
   // Create shortcut manager
   shortcutManager = new ShortcutManager(config.hotkey, (recording) => {
     if (recording) {
+      ipcHandler.markRecordingStarted();
       if (overlayWindow) {
         repositionOverlayTocursor(overlayWindow);
         overlayWindow.showInactive();

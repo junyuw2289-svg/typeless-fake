@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 interface HistoryEntry {
   id: string;
@@ -12,122 +12,64 @@ interface HistoryGroup {
   entries: HistoryEntry[];
 }
 
-interface HistoryPageProps {
-  groups?: HistoryGroup[];
-}
-
-const defaultGroups: HistoryGroup[] = [
-  {
-    label: 'Today',
-    entries: [
-      {
-        id: '1',
-        time: '09:30 PM',
-        text: '可不可以帮我在 Login 页面增加一些元素，然后保持跟 Home Dashboard 里面的元素（比如 Logo 和图标）也都一致？',
-        type: 'dictation',
-      },
-      {
-        id: '2',
-        time: '09:28 PM',
-        text: '为什么这边看起来一直是 generating 的状态？看这个圈中的地方，上面有个 generating 还在跳动。',
-        type: 'dictation',
-      },
-      {
-        id: '3',
-        time: '09:27 PM',
-        text: '好像我的 Generating Login Screen 一直在 generating，能把它这个状态停掉吗？',
-        type: 'dictation',
-      },
-    ],
-  },
-  {
-    label: 'Yesterday',
-    entries: [
-      {
-        id: '4',
-        time: '03:45 PM',
-        text: 'Let me check on the status of the deployment pipeline and make sure everything is running smoothly.',
-        type: 'dictation',
-      },
-      {
-        id: '5',
-        time: '02:10 PM',
-        text: 'Can you summarize the key points from the last team standup meeting?',
-        type: 'ask',
-      },
-    ],
-  },
-  {
-    label: 'Earlier',
-    entries: [
-      {
-        id: '6',
-        time: '11:20 AM',
-        text: 'I need to refactor the authentication module to support multiple OAuth providers.',
-        type: 'dictation',
-      },
-    ],
-  },
-];
-
-const HistoryPage: React.FC<HistoryPageProps> = ({ groups = defaultGroups }) => {
+const HistoryPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'all' | 'dictations' | 'ask'>('all');
   const [retentionValue] = useState('Forever');
   const [isLoading, setIsLoading] = useState(true);
-  const [loadedGroups, setLoadedGroups] = useState<HistoryGroup[] | null>(null);
+  const [groups, setGroups] = useState<HistoryGroup[]>([]);
 
-  useEffect(() => {
-    const loadHistory = async () => {
-      try {
-        const result = await window.electronAPI.historyList(0, 100);
-        if (result.data.length > 0) {
-          // Group by date
-          const today = new Date();
-          const yesterday = new Date(today);
-          yesterday.setDate(yesterday.getDate() - 1);
+  const loadHistory = useCallback(async () => {
+    try {
+      const result = await window.electronAPI.historyList(0, 100);
+      console.log('[DEBUG][HistoryPage] Received', result.data.length, 'records (total:', result.total, ')');
+      console.log('[DEBUG][HistoryPage] Raw data:', JSON.stringify(result.data.map(r => ({ id: r.id, created_at: r.created_at, text: (r.optimized_text || r.original_text).substring(0, 60) }))));
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
 
-          const todayEntries: HistoryEntry[] = [];
-          const yesterdayEntries: HistoryEntry[] = [];
-          const earlierEntries: HistoryEntry[] = [];
+      const todayEntries: HistoryEntry[] = [];
+      const yesterdayEntries: HistoryEntry[] = [];
+      const earlierEntries: HistoryEntry[] = [];
 
-          for (const record of result.data) {
-            const date = new Date(record.created_at);
-            const entry: HistoryEntry = {
-              id: record.id,
-              time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-              text: record.optimized_text || record.original_text,
-              type: 'dictation',
-            };
+      for (const record of result.data) {
+        const date = new Date(record.created_at);
+        const entry: HistoryEntry = {
+          id: record.id,
+          time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+          text: record.optimized_text || record.original_text,
+          type: 'dictation',
+        };
 
-            if (date.toDateString() === today.toDateString()) {
-              todayEntries.push(entry);
-            } else if (date.toDateString() === yesterday.toDateString()) {
-              yesterdayEntries.push(entry);
-            } else {
-              earlierEntries.push(entry);
-            }
-          }
-
-          const grouped: HistoryGroup[] = [];
-          if (todayEntries.length > 0) grouped.push({ label: 'Today', entries: todayEntries });
-          if (yesterdayEntries.length > 0) grouped.push({ label: 'Yesterday', entries: yesterdayEntries });
-          if (earlierEntries.length > 0) grouped.push({ label: 'Earlier', entries: earlierEntries });
-
-          setLoadedGroups(grouped);
+        if (date.toDateString() === today.toDateString()) {
+          todayEntries.push(entry);
+        } else if (date.toDateString() === yesterday.toDateString()) {
+          yesterdayEntries.push(entry);
+        } else {
+          earlierEntries.push(entry);
         }
-      } catch (err) {
-        console.error('Failed to load history:', err);
-      } finally {
-        setIsLoading(false);
       }
-    };
-    loadHistory();
+
+      const grouped: HistoryGroup[] = [];
+      if (todayEntries.length > 0) grouped.push({ label: 'Today', entries: todayEntries });
+      if (yesterdayEntries.length > 0) grouped.push({ label: 'Yesterday', entries: yesterdayEntries });
+      if (earlierEntries.length > 0) grouped.push({ label: 'Earlier', entries: earlierEntries });
+
+      setGroups(grouped);
+    } catch (err) {
+      console.error('Failed to load history:', err);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  // Use loadedGroups if available, otherwise fall back to the groups prop
-  const displayGroups = loadedGroups ?? groups;
+  useEffect(() => {
+    loadHistory();
+    // Re-fetch when a new transcription is saved
+    const dispose = window.electronAPI.onHistoryUpdated(loadHistory);
+    return dispose;
+  }, [loadHistory]);
 
-  const filteredGroups = displayGroups.map((group) => ({
+  const filteredGroups = groups.map((group) => ({
     ...group,
     entries: group.entries.filter((entry) => {
       if (activeTab === 'all') return true;
@@ -227,6 +169,10 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ groups = defaultGroups }) => 
       <div className="flex w-full flex-col gap-[20px]">
         {isLoading ? (
           <span className="text-[14px] font-sans text-[var(--text-tertiary)]">Loading...</span>
+        ) : filteredGroups.length === 0 ? (
+          <span className="text-[14px] font-sans text-[var(--text-tertiary)]">
+            No dictation history yet. Press the hotkey to start your first transcription.
+          </span>
         ) : (
           filteredGroups.map((group) => (
             <React.Fragment key={group.label}>

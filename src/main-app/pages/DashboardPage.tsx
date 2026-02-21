@@ -1,7 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import StatCard from '../components/StatCard';
 
+function formatDuration(totalSeconds: number): string {
+  if (totalSeconds < 60) return `${Math.round(totalSeconds)} sec`;
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.round((totalSeconds % 3600) / 60);
+  if (hours > 0) return `${hours} hr ${minutes} min`;
+  return `${minutes} min`;
+}
+
+function formatWordCount(count: number): string {
+  if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+  return String(count);
+}
+
 const DashboardPage: React.FC = () => {
+  const [stats, setStats] = useState({ totalWords: 0, totalCount: 0, totalDurationSeconds: 0 });
+
+  useEffect(() => {
+    const fetchStats = () => {
+      window.electronAPI.statsGet().then((s) => {
+        console.log('[DEBUG][DashboardPage] Stats received:', JSON.stringify(s));
+        setStats(s);
+      }).catch(console.error);
+    };
+    fetchStats();
+    // Re-fetch when a new transcription is saved
+    const dispose = window.electronAPI.onHistoryUpdated(fetchStats);
+    return dispose;
+  }, []);
+
   return (
     <div className="flex flex-1 flex-col gap-[32px] p-[48px]">
       {/* Header */}
@@ -23,20 +51,20 @@ const DashboardPage: React.FC = () => {
       {/* Stats Grid */}
       <div className="flex w-full gap-[16px]">
         <StatCard
-          icon="✨"
-          value="7.6%"
-          label="Personalization"
+          icon="🎤"
+          value={String(stats.totalCount)}
+          label="Transcriptions"
           accentColor="var(--accent-orange)"
         />
         <StatCard
           icon="⏱"
-          value="1 hr 57 min"
+          value={formatDuration(stats.totalDurationSeconds)}
           label="Total dictation time"
           accentColor="var(--accent-blue)"
         />
         <StatCard
-          icon="🎤"
-          value="15.2K"
+          icon="✍️"
+          value={formatWordCount(stats.totalWords)}
           label="Words dictated"
           accentColor="var(--accent-brown)"
         />

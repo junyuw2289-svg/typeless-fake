@@ -9,6 +9,7 @@ import type {
   HistoryListRequest,
   ProfileUpdateRequest,
 } from '../shared/types';
+import * as fs from 'fs';
 
 const authService = new AuthService();
 const historyService = new HistoryService();
@@ -50,6 +51,27 @@ export function registerAuthIPC(getMainWindow: () => BrowserWindow | null): void
 
   ipcMain.handle(IPC_CHANNELS.HISTORY_DELETE, async (_event, req: { id: string }) => {
     return historyService.delete(req.id);
+  });
+
+  ipcMain.handle(IPC_CHANNELS.HISTORY_GET_DIR, async () => {
+    return historyService.getHistoryDir();
+  });
+
+  ipcMain.handle(IPC_CHANNELS.HISTORY_SET_DIR, async (_event, req: { dir: string }) => {
+    try {
+      if (!fs.existsSync(req.dir)) {
+        fs.mkdirSync(req.dir, { recursive: true });
+      }
+      historyService.setHistoryDir(req.dir);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err instanceof Error ? err.message : 'Failed to set directory' };
+    }
+  });
+
+  // --- Stats ---
+  ipcMain.handle(IPC_CHANNELS.STATS_GET, async () => {
+    return historyService.getStats();
   });
 
   // --- Profile ---

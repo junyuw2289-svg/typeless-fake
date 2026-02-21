@@ -69,6 +69,19 @@ const electronAPI: ElectronAPI = {
     ipcRenderer.invoke(IPC_CHANNELS.HISTORY_LIST, { page, pageSize }),
   historyDelete: (id: string) =>
     ipcRenderer.invoke(IPC_CHANNELS.HISTORY_DELETE, { id }),
+  historyGetDir: () =>
+    ipcRenderer.invoke(IPC_CHANNELS.HISTORY_GET_DIR),
+  historySetDir: (dir: string) =>
+    ipcRenderer.invoke(IPC_CHANNELS.HISTORY_SET_DIR, { dir }),
+
+  // Stats
+  statsGet: () =>
+    ipcRenderer.invoke(IPC_CHANNELS.STATS_GET),
+  onHistoryUpdated: (callback: () => void) => {
+    const handler = () => callback();
+    ipcRenderer.on(IPC_CHANNELS.HISTORY_UPDATED, handler);
+    return () => { ipcRenderer.removeListener(IPC_CHANNELS.HISTORY_UPDATED, handler); };
+  },
 
   // Profile
   profileGet: () =>
