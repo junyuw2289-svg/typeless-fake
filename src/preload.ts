@@ -64,6 +64,14 @@ const electronAPI: ElectronAPI = {
     return () => { ipcRenderer.removeListener(IPC_CHANNELS.AUTH_STATE_CHANGED, handler); };
   },
 
+  // Dictionary
+  dictionaryList: () =>
+    ipcRenderer.invoke(IPC_CHANNELS.DICTIONARY_LIST),
+  dictionaryAdd: (word: string) =>
+    ipcRenderer.invoke(IPC_CHANNELS.DICTIONARY_ADD, { word }),
+  dictionaryDelete: (id: string) =>
+    ipcRenderer.invoke(IPC_CHANNELS.DICTIONARY_DELETE, { id }),
+
   // History
   historyList: (page: number, pageSize: number) =>
     ipcRenderer.invoke(IPC_CHANNELS.HISTORY_LIST, { page, pageSize }),

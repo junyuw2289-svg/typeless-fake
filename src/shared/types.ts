@@ -36,6 +36,13 @@ export interface SessionResult {
   user?: AuthUser;
 }
 
+// Dictionary types
+export interface DictionaryWord {
+  id: string;
+  word: string;
+  created_at: string;
+}
+
 // History types
 export interface TranscriptionRecord {
   id: string;
@@ -105,6 +112,11 @@ export interface ElectronAPI {
   authSignOut: () => Promise<{ success: boolean; error?: string }>;
   authGetSession: () => Promise<SessionResult>;
   onAuthStateChanged: (callback: (user: AuthUser | null) => void) => Disposer;
+
+  // Dictionary
+  dictionaryList: () => Promise<DictionaryWord[]>;
+  dictionaryAdd: (word: string) => Promise<DictionaryWord>;
+  dictionaryDelete: (id: string) => Promise<{ success: boolean }>;
 
   // History
   historyList: (page: number, pageSize: number) => Promise<HistoryListResult>;

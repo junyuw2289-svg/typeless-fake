@@ -4,7 +4,7 @@ import { TranscriptionService } from './transcription-service';
 import { TextInjector } from './text-injector';
 import { getConfig, setConfig } from './config-store';
 import type { AppStatus } from '../shared/types';
-import { historyService } from './auth-ipc';
+import { historyService, dictionaryService } from './auth-ipc';
 
 export class IPCHandler {
   private transcriptionService: TranscriptionService;
@@ -77,12 +77,16 @@ export class IPCHandler {
         console.log('[IPC] Config loaded, API key exists:', !!config.apiKey, 'Polish enabled:', config.enablePolish);
         this.transcriptionService.updateApiKey(config.apiKey);
 
+        const dictionaryWords = dictionaryService.getAllWords();
+        console.log(`[IPC] Dictionary words for prompt: ${dictionaryWords.length}`);
+
         console.log(`[Timing][IPC] Starting transcription: +${Date.now() - stopInitiatedAt}ms from stop`);
         const text = await this.transcriptionService.transcribe(
           Buffer.from(buffer),
           config.language,
           config.enablePolish,
-          stopInitiatedAt
+          stopInitiatedAt,
+          dictionaryWords
         );
         console.log(`[Timing][IPC] Transcription complete: +${Date.now() - stopInitiatedAt}ms from stop`);
         console.log('[IPC] Transcription result:', text);

@@ -44,6 +44,11 @@ export const IPC_CHANNELS = {
   // Profile (renderer → main, invoke)
   PROFILE_GET: 'profile:get',
   PROFILE_UPDATE: 'profile:update',
+
+  // Dictionary (renderer → main, invoke)
+  DICTIONARY_LIST: 'dictionary:list',
+  DICTIONARY_ADD: 'dictionary:add',
+  DICTIONARY_DELETE: 'dictionary:delete',
 } as const;
 
 export const DEFAULT_HOTKEY = '`';
