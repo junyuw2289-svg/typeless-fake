@@ -1,11 +1,14 @@
 import { globalShortcut, BrowserWindow } from 'electron';
 import { IPC_CHANNELS, DEFAULT_HOTKEY } from '../shared/constants';
 
+const DEBOUNCE_MS = 400;
+
 export class ShortcutManager {
   private isRecording = false;
   private overlayWindow: BrowserWindow | null = null;
   private hotkey: string;
   private onToggle: (recording: boolean) => void;
+  private lastToggleTime = 0;
 
   constructor(hotkey: string = DEFAULT_HOTKEY, onToggle: (recording: boolean) => void) {
     this.hotkey = hotkey;
@@ -18,6 +21,13 @@ export class ShortcutManager {
 
   register(): boolean {
     const success = globalShortcut.register(this.hotkey, () => {
+      const now = Date.now();
+      if (now - this.lastToggleTime < DEBOUNCE_MS) {
+        console.log(`[Shortcut] Debounced (${now - this.lastToggleTime}ms since last toggle)`);
+        return;
+      }
+      this.lastToggleTime = now;
+
       this.isRecording = !this.isRecording;
 
       if (this.isRecording) {

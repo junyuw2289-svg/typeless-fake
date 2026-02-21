@@ -104,6 +104,7 @@ export const Overlay: React.FC = () => {
 
   const handleStartRecording = useCallback(async () => {
     isStoppingRef.current = false;
+    isCancellingRef.current = false;
     try {
       await audioRecorder.start();
       analyserRef.current = audioRecorder.getAnalyser();
@@ -191,39 +192,42 @@ export const Overlay: React.FC = () => {
   return (
     <div className="overlay-container">
       <div className="overlay-pill">
-        {status === 'recording' && (
-          <>
-            <WaveformAnimation analyser={analyserRef.current} isActive={true} />
-            <span className="overlay-text">Recording...</span>
-            <button
-              className="cancel-button"
-              onClick={(e) => {
-                console.log('[Click] Cancel button clicked');
-                e.preventDefault();
-                e.stopPropagation();
-                handleCancelRecording();
-              }}
-              onMouseDown={(e) => {
-                console.log('[MouseDown] Cancel button mouse down');
-              }}
-              title="Cancel (ESC)"
-            >
-              ✕
-            </button>
-          </>
-        )}
-        {status === 'transcribing' && (
-          <>
-            <div className="spinner" />
-            <span className="overlay-text">Transcribing...</span>
-          </>
-        )}
-        {status === 'done' && (
+        <div className={`pill-layer ${status === 'recording' ? 'pill-layer--active' : ''}`}>
+          <WaveformAnimation
+            analyser={status === 'recording' ? analyserRef.current : null}
+            isActive={status === 'recording'}
+          />
+          <span className="overlay-text">Listening...</span>
+          <button
+            className="cancel-button"
+            onClick={(e) => {
+              console.log('[Click] Cancel button clicked');
+              e.preventDefault();
+              e.stopPropagation();
+              handleCancelRecording();
+            }}
+            onMouseDown={(e) => {
+              console.log('[MouseDown] Cancel button mouse down');
+            }}
+            title="Cancel (ESC)"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className={`pill-layer ${status === 'transcribing' ? 'pill-layer--active' : ''}`}>
+          <span className="overlay-text">Transcribing...</span>
+        </div>
+
+        <div className={`pill-layer ${status === 'done' ? 'pill-layer--active' : ''}`}>
           <span className="overlay-text overlay-done">Done ✓</span>
-        )}
-        {status === 'error' && (
+        </div>
+
+        <div className={`pill-layer ${status === 'error' ? 'pill-layer--active' : ''}`}>
           <span className="overlay-text overlay-error">{error || 'Error'}</span>
-        )}
+        </div>
+
+        {status === 'transcribing' && <div className="transcribe-sweep" />}
       </div>
     </div>
   );

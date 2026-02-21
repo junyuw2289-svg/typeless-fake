@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Typeless — Main Application Window</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+/* ============================================
+   TYPELESS MAIN APP WINDOW — ANTHROPIC DESIGN SYSTEM
+   Desktop: 1200x800px minimum
+   ============================================ */
+
+/* === DESIGN TOKENS === */
+:root {
+  /* Anthropic Palette */
+  --color-dark: #141413;
+  --color-dark-hover: #1e1e1d;
+  --color-dark-active: #2a2a28;
+  --color-light: #faf9f5;
+  --color-light-hover: #f5f3ed;
+  --color-mid-gray: #b0aea5;
+  --color-light-gray: #e8e6dc;
+  --color-border: #e0ded6;
+  --color-orange: #d97757;
+  --color-orange-hover: #c4694d;
+  --color-orange-light: rgba(217, 119, 87, 0.08);
+  --color-orange-lighter: rgba(217, 119, 87, 0.04);
+  --color-blue: #6a9bcc;
+  --color-blue-light: rgba(106, 155, 204, 0.08);
+  --color-green: #788c5d;
+  --color-green-light: rgba(120, 140, 93, 0.08);
+  --color-red: #c0392b;
+  --color-red-light: rgba(192, 57, 43, 0.08);
+
+  /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+  /* Spacing (8px grid) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(20, 20, 19, 0.04);
+  --shadow-md: 0 2px 8px rgba(20, 20, 19, 0.06), 0 1px 2px rgba(20, 20, 19, 0.04);
+  --shadow-lg: 0 8px 24px rgba(20, 20, 19, 0.08), 0 2px 8px rgba(20, 20, 19, 0.04);
+  --shadow-card: 0 1px 3px rgba(20, 20, 19, 0.03), 0 0 0 1px rgba(20, 20, 19, 0.04);
+
+  /* Transitions */
+  --transition-fast: 120ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 300ms ease;
+
+  /* Sidebar */
+  --sidebar-width: 232px;
+}
+
+/* === RESET === */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-family);
+  background: var(--color-dark);
+  color: var(--color-dark);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  background: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* === SCROLLBAR === */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-light-gray);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-mid-gray);
+}
+
+/* ============================================
+   LAYOUT
+   ============================================ */
+
+.app-layout {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+/* === SIDEBAR === */
+.sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  background: var(--color-dark);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4) var(--space-3);
+  overflow: hidden;
+  position: relative;
+  -webkit-app-region: drag;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-6);
+  -webkit-app-region: drag;
+}
+
+.sidebar-logo {
+  width: 28px;
+  height: 28px;
+  background: var(--color-orange);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  color: white;
+  transform: rotate(-6deg);
+  flex-shrink: 0;
+}
+
+.sidebar-logo span {
+  transform: rotate(6deg);
+  display: block;
+}
+
+.sidebar-brand-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.sidebar-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-orange);
+  background: rgba(217, 119, 87, 0.12);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.02em;
+}
+
+/* Quick action button */
+.sidebar-quick-action {
+  margin: 0 var(--space-2) var(--space-5);
+  -webkit-app-region: no-drag;
+}
+
+.btn-dictate {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-orange);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+  letter-spacing: 0.01em;
+}
+
+.btn-dictate:hover {
+  background: var(--color-orange-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(217, 119, 87, 0.3);
+}
+
+.btn-dictate:active {
+  transform: translateY(0);
+}
+
+.btn-dictate .icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.9;
+}
+
+.btn-dictate .shortcut {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.7;
+  margin-left: auto;
+  background: rgba(255,255,255,0.15);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+}
+
+/* Navigation */
+.sidebar-nav {
+  flex: 1;
+  -webkit-app-region: no-drag;
+}
+
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: var(--space-2) var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  margin: 1px 0;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.55);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  position: relative;
+}
+
+.nav-item:hover {
+  color: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.06);
+}
+
+.nav-item.active {
+  color: #ffffff;
+  background: rgba(255,255,255,0.1);
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 16px;
+  background: var(--color-orange);
+  border-radius: 2px;
+}
+
+.nav-item .icon {
+  width: 18px;
+  height: 18px;
+  opacity: 0.75;
+  flex-shrink: 0;
+}
+
+.nav-item.active .icon {
+  opacity: 1;
+}
+
+.nav-item .badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-orange);
+  background: rgba(217, 119, 87, 0.15);
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  min-width: 18px;
+  text-align: center;
+}
+
+/* Sidebar footer */
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: var(--space-4);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  -webkit-app-region: no-drag;
+}
+
+.sidebar-usage {
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.usage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.usage-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.45);
+}
+
+.usage-value {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.7);
+}
+
+.usage-bar {
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.usage-bar-fill {
+  height: 100%;
+  background: var(--color-orange);
+  border-radius: 2px;
+  transition: width var(--transition-slow);
+}
+
+.usage-bar-fill.low {
+  background: var(--color-green);
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.sidebar-user:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+.user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-orange), #e8956e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-plan {
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.4);
+}
+
+.user-menu-icon {
+  width: 16px;
+  height: 16px;
+  color: rgba(255,255,255,0.3);
+}
+
+/* ============================================
+   MAIN CONTENT AREA
+   ============================================ */
+
+.main-content {
+  flex: 1;
+  background: var(--color-light);
+  border-top-left-radius: var(--radius-2xl);
+  border-bottom-left-radius: var(--radius-2xl);
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Header */
+.content-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-light);
+  padding: var(--space-6) var(--space-8) var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.content-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: var(--space-8);
+  right: var(--space-8);
+  height: 1px;
+  background: var(--color-border);
+  opacity: 0.5;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.header-greeting {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-dark);
+  letter-spacing: -0.03em;
+}
+
+.header-subtitle {
+  font-size: 13px;
+  color: var(--color-mid-gray);
+  font-weight: 400;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.header-search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  min-width: 220px;
+  transition: all var(--transition-base);
+}
+
+.header-search:focus-within {
+  border-color: var(--color-orange);
+  box-shadow: 0 0 0 3px var(--color-orange-light);
+}
+
+.header-search .search-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--color-mid-gray);
+  flex-shrink: 0;
+}
+
+.header-search input {
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--color-dark);
+  outline: none;
+  width: 100%;
+}
+
+.header-search input::placeholder {
+  color: var(--color-mid-gray);
+}
+
+.header-search .search-shortcut {
+  font-size: 11px;
+  color: var(--color-mid-gray);
+  background: var(--color-light);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+  font-weight: 500;
+}
+
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: #fff;
+  border: 1px solid var(--color-border);
+  color: var(--color-mid-gray);
+  transition: all var(--transition-fast);
+}
+
+.btn-icon:hover {
+  border-color: var(--color-light-gray);
+  color: var(--color-dark);
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-icon .icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Content Body */
+.content-body {
+  padding: var(--space-6) var(--space-8) var(--space-8);
+}
+
+/* === STATS CARDS === */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+.stat-card {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  transition: all var(--transition-base);
+  cursor: default;
+}
+
+.stat-card:hover {
+  border-color: var(--color-light-gray);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.stat-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-card-icon.orange {
+  background: var(--color-orange-light);
+  color: var(--color-orange);
+}
+
+.stat-card-icon.blue {
+  background: var(--color-blue-light);
+  color: var(--color-blue);
+}
+
+.stat-card-icon.green {
+  background: var(--color-green-light);
+  color: var(--color-green);
+}
+
+.stat-card-icon.dark {
+  background: rgba(20, 20, 19, 0.06);
+  color: var(--color-dark);
+}
+
+.stat-card-icon .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.stat-card-trend {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.stat-card-trend.up {
+  color: var(--color-green);
+}
+
+.stat-card-trend.down {
+  color: var(--color-red);
+}
+
+.stat-card-trend .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.stat-card-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-dark);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.stat-card-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-mid-gray);
+}
+
+/* === CONTENT SECTIONS === */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-dark);
+  letter-spacing: -0.02em;
+}
+
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.btn-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-orange);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.btn-text:hover {
+  background: var(--color-orange-light);
+}
+
+/* Filter chips */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.filter-chip {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-mid-gray);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: #fff;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.filter-chip:hover {
+  border-color: var(--color-mid-gray);
+  color: var(--color-dark);
+}
+
+.filter-chip.active {
+  background: var(--color-dark);
+  color: #ffffff;
+  border-color: var(--color-dark);
+}
+
+/* === HISTORY LIST === */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.history-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: #ffffff;
+  transition: background var(--transition-fast);
+  cursor: pointer;
+}
+
+.history-item:hover {
+  background: var(--color-light-hover);
+}
+
+.history-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.history-icon.app-slack {
+  background: #4a154b;
+  color: white;
+}
+
+.history-icon.app-gmail {
+  background: #ea4335;
+  color: white;
+}
+
+.history-icon.app-notion {
+  background: var(--color-dark);
+  color: white;
+}
+
+.history-icon.app-vscode {
+  background: #007acc;
+  color: white;
+}
+
+.history-icon.app-docs {
+  background: #4285f4;
+  color: white;
+}
+
+.history-icon.app-default {
+  background: var(--color-light-gray);
+  color: var(--color-mid-gray);
+}
+
+.history-icon .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.history-icon .icon-text {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}
+
+.history-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-dark);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: var(--space-1);
+}
+
+.history-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 11px;
+  color: var(--color-mid-gray);
+}
+
+.history-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.history-meta-item .icon {
+  width: 12px;
+  height: 12px;
+}
+
+.history-meta .dot {
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: var(--color-mid-gray);
+}
+
+.history-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.history-item:hover .history-actions {
+  opacity: 1;
+}
+
+.history-action-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--color-mid-gray);
+  transition: all var(--transition-fast);
+}
+
+.history-action-btn:hover {
+  background: rgba(20, 20, 19, 0.06);
+  color: var(--color-dark);
+}
+
+.history-action-btn .icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* === INTEGRATIONS PEEK === */
+.integrations-peek {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}
+
+.integration-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+.integration-card {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  transition: all var(--transition-base);
+  cursor: pointer;
+}
+
+.integration-card:hover {
+  border-color: var(--color-light-gray);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.integration-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.integration-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.integration-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+.integration-status {
+  font-size: 11px;
+  color: var(--color-mid-gray);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-dot.active {
+  background: var(--color-green);
+}
+
+.status-dot.inactive {
+  background: var(--color-mid-gray);
+}
+
+/* ============================================
+   EMPTY STATE (variant)
+   ============================================ */
+
+.empty-state {
+  display: none; /* Toggle in variant */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-16) var(--space-8);
+}
+
+.empty-state-illustration {
+  width: 160px;
+  height: 160px;
+  margin-bottom: var(--space-6);
+  position: relative;
+}
+
+.empty-state-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--color-orange-lighter);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-state-icon {
+  width: 64px;
+  height: 64px;
+  color: var(--color-orange);
+  opacity: 0.6;
+}
+
+.empty-state-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-dark);
+  margin-bottom: var(--space-2);
+  letter-spacing: -0.02em;
+}
+
+.empty-state-desc {
+  font-size: 14px;
+  color: var(--color-mid-gray);
+  max-width: 380px;
+  line-height: 1.6;
+  margin-bottom: var(--space-6);
+}
+
+.empty-state-cta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  background: var(--color-orange);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+}
+
+.empty-state-cta:hover {
+  background: var(--color-orange-hover);
+  box-shadow: 0 4px 12px rgba(217, 119, 87, 0.3);
+  transform: translateY(-1px);
+}
+
+.empty-state-hint {
+  margin-top: var(--space-4);
+  font-size: 12px;
+  color: var(--color-mid-gray);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.empty-state-hint kbd {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  padding: 1px 8px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+/* ============================================
+   VARIANT TABS (for design demo)
+   ============================================ */
+
+.design-variant-bar {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  background: var(--color-dark);
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  z-index: 100;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.design-variant-bar button {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  transition: all var(--transition-fast);
+}
+
+.design-variant-bar button:hover {
+  color: rgba(255,255,255,0.9);
+}
+
+.design-variant-bar button.active {
+  background: var(--color-orange);
+  color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .integration-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="app-layout" id="appLayout">
+  <!-- ============================================
+       SIDEBAR
+       ============================================ -->
+  <aside class="sidebar">
+    <!-- Brand -->
+    <div class="sidebar-brand">
+      <div class="sidebar-logo"><span>T</span></div>
+      <span class="sidebar-brand-text">Typeless</span>
+      <span class="sidebar-badge">Pro</span>
+    </div>
+
+    <!-- Quick Dictate Button -->
+    <div class="sidebar-quick-action">
+      <button class="btn-dictate">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" x2="12" y1="19" y2="22"/>
+        </svg>
+        Start Dictation
+        <span class="shortcut">Fn</span>
+      </button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a class="nav-item active" href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="7" height="9" x="3" y="3" rx="1"/>
+          <rect width="7" height="5" x="14" y="3" rx="1"/>
+          <rect width="7" height="9" x="14" y="12" rx="1"/>
+          <rect width="7" height="5" x="3" y="16" rx="1"/>
+        </svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+          <path d="M12 7v5l4 2"/>
+        </svg>
+        History
+        <span class="badge">24</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+        </svg>
+        Dictionary
+      </a>
+
+      <div class="nav-section-label">Connect</div>
+      <a class="nav-item" href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="18" height="18" x="3" y="3" rx="2"/>
+          <path d="M7 7h.01"/>
+          <path d="M17 7h.01"/>
+          <path d="M7 17h.01"/>
+          <path d="M17 17h.01"/>
+          <path d="m8 11 4 4 4-4"/>
+        </svg>
+        Integrations
+      </a>
+
+      <div class="nav-section-label">System</div>
+      <a class="nav-item" href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        Settings
+      </a>
+    </nav>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+      <!-- Weekly usage -->
+      <div class="sidebar-usage">
+        <div class="usage-header">
+          <span class="usage-label">This week</span>
+          <span class="usage-value">2,847 / 4,000 words</span>
+        </div>
+        <div class="usage-bar">
+          <div class="usage-bar-fill" style="width: 71%"></div>
+        </div>
+      </div>
+
+      <!-- User -->
+      <div class="sidebar-user">
+        <div class="user-avatar">JS</div>
+        <div class="user-info">
+          <div class="user-name">Jun Smith</div>
+          <div class="user-plan">Pro Plan</div>
+        </div>
+        <svg class="user-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>
+        </svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============================================
+       MAIN CONTENT — DASHBOARD STATE (populated)
+       ============================================ -->
+  <main class="main-content" id="mainContent">
+    <!-- Header -->
+    <div class="content-header">
+      <div class="header-left">
+        <h1 class="header-greeting">Good afternoon, Jun</h1>
+        <p class="header-subtitle">You've dictated 2,847 words this week. Keep going!</p>
+      </div>
+      <div class="header-right">
+        <div class="header-search">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+          <input type="text" placeholder="Search history..." />
+          <span class="search-shortcut">/</span>
+        </div>
+        <button class="btn-icon" title="Notifications">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Content Body -->
+    <div class="content-body" id="contentBody">
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <!-- Total Dictations -->
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-icon orange">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" x2="12" y1="19" y2="22"/>
+              </svg>
+            </div>
+            <div class="stat-card-trend up">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m5 12 7-7 7 7"/></svg>
+              12%
+            </div>
+          </div>
+          <div class="stat-card-value">847</div>
+          <div class="stat-card-label">Total dictations</div>
+        </div>
+
+        <!-- Time Saved -->
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-icon blue">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+            <div class="stat-card-trend up">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m5 12 7-7 7 7"/></svg>
+              8%
+            </div>
+          </div>
+          <div class="stat-card-value">14.2<span style="font-size:16px;font-weight:600;color:var(--color-mid-gray)">hrs</span></div>
+          <div class="stat-card-label">Time saved</div>
+        </div>
+
+        <!-- Accuracy -->
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-icon green">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <path d="m9 11 3 3L22 4"/>
+              </svg>
+            </div>
+            <div class="stat-card-trend up">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m5 12 7-7 7 7"/></svg>
+              2%
+            </div>
+          </div>
+          <div class="stat-card-value">96.8<span style="font-size:16px;font-weight:600;color:var(--color-mid-gray)">%</span></div>
+          <div class="stat-card-label">Accuracy rate</div>
+        </div>
+
+        <!-- Words This Week -->
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-icon dark">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                <path d="m15 5 4 4"/>
+              </svg>
+            </div>
+            <div class="stat-card-trend up">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m5 12 7-7 7 7"/></svg>
+              18%
+            </div>
+          </div>
+          <div class="stat-card-value">2,847</div>
+          <div class="stat-card-label">Words this week</div>
+        </div>
+      </div>
+
+      <!-- Recent History -->
+      <div class="section-header">
+        <h2 class="section-title">Recent Dictations</h2>
+        <div class="section-actions">
+          <button class="btn-text">View all</button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-chip active">All</button>
+        <button class="filter-chip">Slack</button>
+        <button class="filter-chip">Gmail</button>
+        <button class="filter-chip">Notion</button>
+        <button class="filter-chip">VS Code</button>
+        <button class="filter-chip">Google Docs</button>
+      </div>
+
+      <div class="history-list">
+        <!-- Item 1 -->
+        <div class="history-item">
+          <div class="history-icon app-slack">
+            <span class="icon-text">S</span>
+          </div>
+          <div class="history-content">
+            <div class="history-text">Hey team, I just finished reviewing the latest design mockups for the onboarding flow. I think we should move forward with option B since it has a cleaner layout and better conversion potential.</div>
+            <div class="history-meta">
+              <span class="history-meta-item">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                2 min ago
+              </span>
+              <span class="dot"></span>
+              <span class="history-meta-item">Slack</span>
+              <span class="dot"></span>
+              <span class="history-meta-item">42 words</span>
+            </div>
+          </div>
+          <div class="history-actions">
+            <button class="history-action-btn" title="Copy">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            </button>
+            <button class="history-action-btn" title="Delete">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="history-item">
+          <div class="history-icon app-gmail">
+            <span class="icon-text">G</span>
+          </div>
+          <div class="history-content">
+            <div class="history-text">Dear Dr. Martinez, Thank you for scheduling the consultation for next Thursday. I'd like to confirm the appointment at 2:30 PM and will bring all the necessary documentation as discussed.</div>
+            <div class="history-meta">
+              <span class="history-meta-item">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                15 min ago
+              </span>
+              <span class="dot"></span>
+              <span class="history-meta-item">Gmail</span>
+              <span class="dot"></span>
+              <span class="history-meta-item">38 words</span>
+            </div>
+          </div>
+          <div class="history-actions">
+            <button class="history-action-btn" title="Copy">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            </button>
+            <button class="history-action-btn" title="Delete">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="history-item">
+          <div class="history-icon app-notion">
+            <span class="icon-text">N</span>
+          </div>
+          <div class="history-content">
+            <div class="history-text">Sprint retrospective notes: The team velocity improved by 15% this sprint. Key wins include the successful launch of the payment integration and resolving the critical cache invalidation bug.</div>
+            <div class="history-meta">
+              <span class="history-meta-item">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                1 hour ago
+              </span>
+              <span class="dot"></span>
+              <span class="history-meta-item">Notion</span>
+              <span class="dot"></span>
+              <span class="history-meta-item">34 words</span>
+            </div>
+          </div>
+          <div class="history-actions">
+            <button class="history-action-btn" title="Copy">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            </button>
+            <button class="history-action-btn" title="Delete">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Item 4 -->
+        <div class="history-item">
+          <div class="history-icon app-vscode">
+            <span class="icon-text">&lt;/&gt;</span>
+          </div>
+          <div class="history-content">
+            <div class="history-text">Add a new utility function that validates email addresses using a regex pattern and returns a boolean. It should handle edge cases like plus addressing and subdomains.</div>
+            <div class="history-meta">
+              <span class="history-meta-item">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                2 hours ago
+              </span>
+              <span class="dot"></span>
+              <span class="history-meta-item">VS Code</span>
+              <span class="dot"></span>
+              <span class="history-meta-item">31 words</span>
+            </div>
+          </div>
+          <div class="history-actions">
+            <button class="history-action-btn" title="Copy">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            </button>
+            <button class="history-action-btn" title="Delete">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Item 5 -->
+        <div class="history-item">
+          <div class="history-icon app-docs">
+            <span class="icon-text">D</span>
+          </div>
+          <div class="history-content">
+            <div class="history-text">The quarterly report shows a 23% increase in user engagement across all platforms, with mobile users accounting for the majority of growth driven primarily by the new push notification strategy.</div>
+            <div class="history-meta">
+              <span class="history-meta-item">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Yesterday
+              </span>
+              <span class="dot"></span>
+              <span class="history-meta-item">Google Docs</span>
+              <span class="dot"></span>
+              <span class="history-meta-item">35 words</span>
+            </div>
+          </div>
+          <div class="history-actions">
+            <button class="history-action-btn" title="Copy">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            </button>
+            <button class="history-action-btn" title="Delete">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Integrations Peek -->
+      <div class="integrations-peek">
+        <div class="section-header">
+          <h2 class="section-title">Active Integrations</h2>
+          <div class="section-actions">
+            <button class="btn-text">Manage</button>
+          </div>
+        </div>
+        <div class="integration-grid">
+          <div class="integration-card">
+            <div class="integration-icon" style="background:#4a154b;color:white">
+              <span class="icon-text">S</span>
+            </div>
+            <div class="integration-info">
+              <div class="integration-name">Slack</div>
+              <div class="integration-status">
+                <span class="status-dot active"></span>
+                Connected
+              </div>
+            </div>
+          </div>
+          <div class="integration-card">
+            <div class="integration-icon" style="background:#ea4335;color:white">
+              <span class="icon-text">G</span>
+            </div>
+            <div class="integration-info">
+              <div class="integration-name">Gmail</div>
+              <div class="integration-status">
+                <span class="status-dot active"></span>
+                Connected
+              </div>
+            </div>
+          </div>
+          <div class="integration-card">
+            <div class="integration-icon" style="background:var(--color-dark);color:white">
+              <span class="icon-text">N</span>
+            </div>
+            <div class="integration-info">
+              <div class="integration-name">Notion</div>
+              <div class="integration-status">
+                <span class="status-dot active"></span>
+                Connected
+              </div>
+            </div>
+          </div>
+          <div class="integration-card">
+            <div class="integration-icon" style="background:#007acc;color:white">
+              <span class="icon-text">&lt;/&gt;</span>
+            </div>
+            <div class="integration-info">
+              <div class="integration-name">VS Code</div>
+              <div class="integration-status">
+                <span class="status-dot active"></span>
+                Connected
+              </div>
+            </div>
+          </div>
+          <div class="integration-card">
+            <div class="integration-icon" style="background:#4285f4;color:white">
+              <span class="icon-text">D</span>
+            </div>
+            <div class="integration-info">
+              <div class="integration-name">Google Docs</div>
+              <div class="integration-status">
+                <span class="status-dot active"></span>
+                Connected
+              </div>
+            </div>
+          </div>
+          <div class="integration-card" style="border-style: dashed; background: transparent;">
+            <div class="integration-icon" style="background: var(--color-light-gray); color: var(--color-mid-gray);">
+              <svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            </div>
+            <div class="integration-info">
+              <div class="integration-name" style="color: var(--color-mid-gray);">Add Integration</div>
+              <div class="integration-status">Browse available apps</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPTY STATE (hidden by default, toggled via JS) -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-state-illustration">
+        <div class="empty-state-circle">
+          <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" x2="12" y1="19" y2="22"/>
+          </svg>
+        </div>
+      </div>
+      <h3 class="empty-state-title">Start your first dictation</h3>
+      <p class="empty-state-desc">
+        Place your cursor in any text field and press the shortcut key to begin dictating. Typeless will transcribe, polish, and insert your words automatically.
+      </p>
+      <button class="empty-state-cta">
+        <svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" x2="12" y1="19" y2="22"/>
+        </svg>
+        Try Dictating Now
+      </button>
+      <div class="empty-state-hint">
+        Or press <kbd>Fn</kbd> anywhere to start
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Variant switcher (design demo only) -->
+<div class="design-variant-bar">
+  <button class="active" onclick="showVariant('populated')">Dashboard</button>
+  <button onclick="showVariant('empty')">Empty State</button>
+</div>
+
+<script>
+function showVariant(variant) {
+  const buttons = document.querySelectorAll('.design-variant-bar button');
+  buttons.forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  const contentBody = document.getElementById('contentBody');
+  const emptyState = document.getElementById('emptyState');
+
+  if (variant === 'empty') {
+    contentBody.style.display = 'none';
+    emptyState.style.display = 'flex';
+  } else {
+    contentBody.style.display = 'block';
+    emptyState.style.display = 'none';
+  }
+}
+</script>
+
+</body>
+</html>
