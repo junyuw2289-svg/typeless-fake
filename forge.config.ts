@@ -7,10 +7,10 @@ import { MakerDMG } from '@electron-forge/maker-dmg';
 import { VitePlugin } from '@electron-forge/plugin-vite';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
-// import dotenv from 'dotenv';
+import dotenv from 'dotenv';
 
-// 本地开发不需要加载环境变量
-// dotenv.config();
+// 加载环境变量用于签名和公证
+dotenv.config();
 
 const config: ForgeConfig = {
   packagerConfig: {
@@ -22,20 +22,19 @@ const config: ForgeConfig = {
       NSMicrophoneUsageDescription: 'Typeless needs access to your microphone to record voice for transcription.',
       NSAppleEventsUsageDescription: 'Typeless needs to send keystrokes to insert transcribed text into other applications.',
     },
-    // 本地开发：禁用代码签名和公证
-    // 如果需要分发，取消注释下面的配置并配置环境变量
-    // osxSign: {
-    //   identity: 'Developer ID Application',
-    //   'hardened-runtime': true,
-    //   entitlements: 'entitlements.plist',
-    //   'entitlements-inherit': 'entitlements.plist',
-    // },
-    // osxNotarize: {
-    //   tool: 'notarytool',
-    //   appleId: process.env.APPLE_ID!,
-    //   appleIdPassword: process.env.APPLE_ID_PASSWORD!,
-    //   teamId: process.env.APPLE_TEAM_ID!,
-    // },
+    // 代码签名和公证配置
+    osxSign: {
+      identity: 'Developer ID Application',
+      'hardened-runtime': true,
+      entitlements: 'entitlements.plist',
+      'entitlements-inherit': 'entitlements.plist',
+    },
+    osxNotarize: {
+      tool: 'notarytool',
+      appleId: process.env.APPLE_ID!,
+      appleIdPassword: process.env.APPLE_ID_PASSWORD!,
+      teamId: process.env.APPLE_TEAM_ID!,
+    },
   },
   rebuildConfig: {},
   makers: [
