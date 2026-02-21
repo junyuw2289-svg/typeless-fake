@@ -1,15 +1,18 @@
-import { Tray, Menu, nativeImage, dialog } from 'electron';
+import { Tray, Menu, nativeImage, dialog, app } from 'electron';
 import type { NativeImage } from 'electron';
+import path from 'node:path';
 import { getConfig, setConfig } from './config-store';
 
 export class TrayManager {
   private tray: Tray | null = null;
   private onQuit: () => void;
   private onApiKeyChanged: (key: string) => void;
+  private onOpenMainWindow: () => void;
 
-  constructor(onQuit: () => void, onApiKeyChanged: (key: string) => void) {
+  constructor(onQuit: () => void, onApiKeyChanged: (key: string) => void, onOpenMainWindow: () => void) {
     this.onQuit = onQuit;
     this.onApiKeyChanged = onApiKeyChanged;
+    this.onOpenMainWindow = onOpenMainWindow;
   }
 
   create(): void {
@@ -30,12 +33,14 @@ export class TrayManager {
     const contextMenu = Menu.buildFromTemplate([
       { label: `Typeless - ${statusText}`, enabled: false },
       { type: 'separator' },
-      { label: 'Press F2 to start/stop recording', enabled: false },
+      { label: 'Press ` to start/stop recording', enabled: false },
       { type: 'separator' },
       {
         label: hasApiKey ? 'Change OpenAI API Key...' : 'Set OpenAI API Key...',
         click: () => this.promptApiKey(),
       },
+      { type: 'separator' },
+      { label: 'Open Typeless', click: () => this.onOpenMainWindow() },
       { type: 'separator' },
       {
         label: 'Quit',
@@ -84,16 +89,11 @@ export class TrayManager {
   }
 
   private createTrayIcon(): NativeImage {
-    const size = 16;
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 16 16">
-      <rect x="5.5" y="2" width="5" height="7" rx="2.5" fill="black"/>
-      <path d="M3.5 8 Q3.5 12.5 8 12.5 Q12.5 12.5 12.5 8" stroke="black" fill="none" stroke-width="1.2"/>
-      <line x1="8" y1="12.5" x2="8" y2="14.5" stroke="black" stroke-width="1.2"/>
-      <line x1="5.5" y1="14.5" x2="10.5" y2="14.5" stroke="black" stroke-width="1.2"/>
-    </svg>`;
-
-    const dataUrl = `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
-    const img = nativeImage.createFromDataURL(dataUrl);
+    // nativeImage.createFromDataURL does NOT support SVG — use PNG files
+    const assetsDir = app.isPackaged
+      ? path.join(process.resourcesPath, 'assets')
+      : path.join(app.getAppPath(), 'assets');
+    const img = nativeImage.createFromPath(path.join(assetsDir, 'trayTemplate.png'));
     img.setTemplateImage(true);
     return img;
   }

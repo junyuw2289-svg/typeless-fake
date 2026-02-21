@@ -21,6 +21,7 @@ if (store.get('language') === 'zh') {
   store.set('language', '');
 }
 
+store.set('hotkey', DEFAULT_HOTKEY);
 store.set('enablePolish', true);
 
 export function getConfig(): StoreSchema {

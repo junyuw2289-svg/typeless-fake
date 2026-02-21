@@ -2,8 +2,8 @@ import { BrowserWindow, screen } from 'electron';
 import path from 'node:path';
 import { OVERLAY_WIDTH, OVERLAY_HEIGHT } from '../shared/constants';
 
-declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
-declare const MAIN_WINDOW_VITE_NAME: string;
+declare const OVERLAY_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
+declare const OVERLAY_WINDOW_VITE_NAME: string;
 
 const BOTTOM_PADDING = 48;
 
@@ -49,11 +49,11 @@ export function createOverlayWindow(): BrowserWindow {
   overlay.setAlwaysOnTop(true, 'floating');
 
   // Load the same renderer but the overlay component will handle routing
-  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    overlay.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+  if (OVERLAY_WINDOW_VITE_DEV_SERVER_URL) {
+    overlay.loadURL(OVERLAY_WINDOW_VITE_DEV_SERVER_URL);
   } else {
     overlay.loadFile(
-      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`)
+      path.join(__dirname, `../renderer/${OVERLAY_WINDOW_VITE_NAME}/index.html`)
     );
   }
 

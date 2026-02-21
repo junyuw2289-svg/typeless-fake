@@ -46,6 +46,35 @@ const electronAPI: ElectronAPI = {
   setSettings: (settings) => {
     ipcRenderer.send(IPC_CHANNELS.SETTINGS_SET, settings);
   },
+
+  // Auth
+  authSignUp: (email: string, password: string, displayName: string) =>
+    ipcRenderer.invoke(IPC_CHANNELS.AUTH_SIGN_UP, { email, password, displayName }),
+  authSignIn: (email: string, password: string) =>
+    ipcRenderer.invoke(IPC_CHANNELS.AUTH_SIGN_IN, { email, password }),
+  authSignInWithGoogle: () =>
+    ipcRenderer.invoke(IPC_CHANNELS.AUTH_SIGN_IN_GOOGLE),
+  authSignOut: () =>
+    ipcRenderer.invoke(IPC_CHANNELS.AUTH_SIGN_OUT),
+  authGetSession: () =>
+    ipcRenderer.invoke(IPC_CHANNELS.AUTH_GET_SESSION),
+  onAuthStateChanged: (callback: (user: any) => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: { user: any }) => callback(data.user);
+    ipcRenderer.on(IPC_CHANNELS.AUTH_STATE_CHANGED, handler);
+    return () => { ipcRenderer.removeListener(IPC_CHANNELS.AUTH_STATE_CHANGED, handler); };
+  },
+
+  // History
+  historyList: (page: number, pageSize: number) =>
+    ipcRenderer.invoke(IPC_CHANNELS.HISTORY_LIST, { page, pageSize }),
+  historyDelete: (id: string) =>
+    ipcRenderer.invoke(IPC_CHANNELS.HISTORY_DELETE, { id }),
+
+  // Profile
+  profileGet: () =>
+    ipcRenderer.invoke(IPC_CHANNELS.PROFILE_GET),
+  profileUpdate: (data: { displayName: string }) =>
+    ipcRenderer.invoke(IPC_CHANNELS.PROFILE_UPDATE, data),
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

@@ -18,9 +18,27 @@ export const IPC_CHANNELS = {
   SETTINGS_GET: 'settings:get',
   SETTINGS_SET: 'settings:set',
   SETTINGS_UPDATED: 'settings:updated',
+
+  // Auth (renderer → main, invoke)
+  AUTH_SIGN_UP: 'auth:sign-up',
+  AUTH_SIGN_IN: 'auth:sign-in',
+  AUTH_SIGN_IN_GOOGLE: 'auth:sign-in-google',
+  AUTH_SIGN_OUT: 'auth:sign-out',
+  AUTH_GET_SESSION: 'auth:get-session',
+
+  // Auth (main → renderer, push)
+  AUTH_STATE_CHANGED: 'auth:state-changed',
+
+  // History (renderer → main, invoke)
+  HISTORY_LIST: 'history:list',
+  HISTORY_DELETE: 'history:delete',
+
+  // Profile (renderer → main, invoke)
+  PROFILE_GET: 'profile:get',
+  PROFILE_UPDATE: 'profile:update',
 } as const;
 
-export const DEFAULT_HOTKEY = 'F2';
+export const DEFAULT_HOTKEY = '`';
 
 export const OVERLAY_WIDTH = 220;
 export const OVERLAY_HEIGHT = 64;

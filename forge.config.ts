@@ -12,29 +12,42 @@ import dotenv from 'dotenv';
 // 加载环境变量用于签名和公证
 dotenv.config();
 
+// 条件化签名/公证：有 APPLE_ID 时完整签名，否则 ad-hoc 签名 (Apple Silicon 必须)
+const shouldSign = !!process.env.APPLE_ID;
+
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
     appBundleId: 'com.junyuwang.typeless',
     appCategoryType: 'public.app-category.productivity',
-    icon: './assets/icon.icns', // 你需要创建这个图标文件
+    icon: './assets/icon.icns',
+    extraResource: ['./assets'],
+    protocols: [
+      {
+        name: 'Typeless Auth',
+        schemes: ['typeless'],
+      },
+    ],
     extendInfo: {
       NSMicrophoneUsageDescription: 'Typeless needs access to your microphone to record voice for transcription.',
       NSAppleEventsUsageDescription: 'Typeless needs to send keystrokes to insert transcribed text into other applications.',
     },
-    // 代码签名和公证配置
-    osxSign: {
-      identity: 'Developer ID Application',
-      'hardened-runtime': true,
-      entitlements: 'entitlements.plist',
-      'entitlements-inherit': 'entitlements.plist',
-    },
-    osxNotarize: {
-      tool: 'notarytool',
-      appleId: process.env.APPLE_ID!,
-      appleIdPassword: process.env.APPLE_ID_PASSWORD!,
-      teamId: process.env.APPLE_TEAM_ID!,
-    },
+    ...(shouldSign ? {
+      osxSign: {
+        identity: 'Developer ID Application',
+        'hardened-runtime': true,
+        entitlements: 'entitlements.plist',
+        'entitlements-inherit': 'entitlements.plist',
+      },
+      osxNotarize: {
+        tool: 'notarytool',
+        appleId: process.env.APPLE_ID!,
+        appleIdPassword: process.env.APPLE_ID_PASSWORD!,
+        teamId: process.env.APPLE_TEAM_ID!,
+      },
+    } : {
+      osxSign: { identity: '-' },
+    }),
   },
   rebuildConfig: {},
   makers: [
@@ -70,8 +83,12 @@ const config: ForgeConfig = {
       ],
       renderer: [
         {
-          name: 'main_window',
+          name: 'overlay_window',
           config: 'vite.renderer.config.ts',
+        },
+        {
+          name: 'main_window',
+          config: 'vite.main-renderer.config.ts',
         },
       ],
     }),

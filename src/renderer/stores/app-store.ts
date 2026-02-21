@@ -18,7 +18,7 @@ export const useAppStore = create<AppState>((set) => ({
   lastTranscription: '',
   error: null,
   settings: {
-    hotkey: 'F2',
+    hotkey: '`',
     apiKey: '',
     language: '',
     enablePolish: true,

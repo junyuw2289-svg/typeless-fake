@@ -4,6 +4,7 @@ import { TranscriptionService } from './transcription-service';
 import { TextInjector } from './text-injector';
 import { getConfig, setConfig } from './config-store';
 import type { AppStatus } from '../shared/types';
+import { historyService } from './auth-ipc';
 
 export class IPCHandler {
   private transcriptionService: TranscriptionService;
@@ -81,6 +82,14 @@ export class IPCHandler {
           console.log(`[Timing][IPC] Injecting text: +${injectStart - stopInitiatedAt}ms from stop`);
           await this.textInjector.inject(text);
           console.log(`[Timing][IPC] Text injection done: +${Date.now() - stopInitiatedAt}ms from stop (inject took ${Date.now() - injectStart}ms)`);
+
+          // Save to history (fire-and-forget, don't block main flow)
+          historyService.save({
+            original_text: text,
+            optimized_text: config.enablePolish ? text : null,
+            app_context: null,
+            duration_seconds: null,
+          }).catch((err) => console.error('[History] Failed to save:', err));
 
           this.overlayWindow?.webContents.send(IPC_CHANNELS.TRANSCRIPTION_RESULT, text);
           this.sendStatus('done');

@@ -1,4 +1,5 @@
 import { app, BrowserWindow, globalShortcut, systemPreferences, dialog } from 'electron';
+import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import { ShortcutManager } from './main/shortcut-manager';
 import { TranscriptionService } from './main/transcription-service';
@@ -6,13 +7,57 @@ import { TextInjector } from './main/text-injector';
 import { TrayManager } from './main/tray-manager';
 import { IPCHandler } from './main/ipc-handlers';
 import { createOverlayWindow, repositionOverlayTocursor } from './main/overlay-window';
+import { toggleMainWindow, getMainWindow } from './main/main-window';
 import { getConfig } from './main/config-store';
 import { IPC_CHANNELS } from './shared/constants';
+import { registerAuthIPC, authService } from './main/auth-ipc';
+import { getSupabaseClient } from './main/supabase-client';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
 }
+
+// Register custom protocol for OAuth deep link callback (packaged mode only)
+if (app.isPackaged) {
+  app.setAsDefaultProtocolClient('typeless');
+} else if (process.defaultApp && process.argv.length >= 2) {
+  app.setAsDefaultProtocolClient('typeless', process.execPath, [path.resolve(process.argv[1])]);
+}
+
+// Handle deep link on macOS (open-url event) — used in packaged mode
+app.on('open-url', (event, url) => {
+  event.preventDefault();
+  handleAuthDeepLink(url);
+});
+
+async function handleAuthDeepLink(url: string): Promise<void> {
+  try {
+    const parsedUrl = new URL(url);
+    if (parsedUrl.host === 'auth' && parsedUrl.pathname === '/callback') {
+      console.log('[Auth] Deep link callback received');
+      const result = await authService.handleOAuthCallback(url);
+      showAuthResult(result);
+    }
+  } catch (err) {
+    console.error('Failed to handle auth deep link:', err);
+  }
+}
+
+function showAuthResult(result: { success: boolean; user?: any }): void {
+  const mw = getMainWindow();
+  if (result.success && mw) {
+    mw.webContents.send(IPC_CHANNELS.AUTH_STATE_CHANGED, { user: result.user });
+    mw.show();
+    mw.focus();
+  }
+}
+
+// Dev mode: wire up localhost HTTP callback notification
+authService.onOAuthComplete = (result) => {
+  console.log('[Auth] OAuth complete via dev server:', result.success);
+  showAuthResult(result);
+};
 
 let overlayWindow: BrowserWindow | null = null;
 let shortcutManager: ShortcutManager | null = null;
@@ -55,6 +100,28 @@ function initApp(): void {
     trayManager?.updateMenu('transcribing');
   });
   ipcHandler.register();
+  registerAuthIPC(getMainWindow);
+
+  // Start Supabase auth auto-refresh (required for non-browser environments)
+  const supabase = getSupabaseClient();
+  supabase.auth.startAutoRefresh();
+
+  // Listen for auth state changes and push to renderer
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'SIGNED_OUT') {
+      const mw = getMainWindow();
+      if (mw) {
+        const user = session ? {
+          id: session.user.id,
+          email: session.user.email!,
+          displayName: session.user.user_metadata?.full_name || session.user.user_metadata?.display_name || session.user.email!.split('@')[0],
+        } : null;
+        setTimeout(() => {
+          mw.webContents.send(IPC_CHANNELS.AUTH_STATE_CHANGED, { user });
+        }, 0);
+      }
+    }
+  });
 
   // Create shortcut manager
   shortcutManager = new ShortcutManager(config.hotkey, (recording) => {
@@ -82,10 +149,14 @@ function initApp(): void {
   shortcutManager.setOverlayWindow(overlayWindow);
   shortcutManager.register();
 
+  // Create and show main window on startup
+  toggleMainWindow();
+
   // Create tray
   trayManager = new TrayManager(
     () => app.quit(),
     (apiKey) => transcriptionService.updateApiKey(apiKey),
+    () => toggleMainWindow(),
   );
   trayManager.create();
 
@@ -111,11 +182,20 @@ function initApp(): void {
     }
   }
 
-  console.log('Typeless initialized. Press F2 to start/stop recording.');
+  console.log('Typeless initialized. Press ` to start/stop recording.');
 }
 
 app.on('ready', () => {
   initApp();
+});
+
+app.on('before-quit', () => {
+  getSupabaseClient().auth.stopAutoRefresh();
+  const mw = getMainWindow();
+  if (mw) {
+    (mw as any)._forceClose = true;
+    mw.close();
+  }
 });
 
 app.on('will-quit', () => {
