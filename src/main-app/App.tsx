@@ -7,6 +7,9 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import HistoryPage from './pages/HistoryPage';
 import DictionaryPage from './pages/DictionaryPage';
+import AccountPage from './pages/AccountPage';
+import AccountProfilePage from './pages/AccountProfilePage';
+import UnderConstruction from './components/UnderConstruction';
 
 const App: React.FC = () => {
   return (
@@ -23,6 +26,15 @@ const App: React.FC = () => {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/dictionary" element={<DictionaryPage />} />
+            <Route path="/account" element={<AccountPage />}>
+              <Route index element={<AccountProfilePage />} />
+              <Route path="settings" element={<UnderConstruction />} />
+              <Route path="personalization" element={<UnderConstruction />} />
+              <Route path="about" element={<UnderConstruction />} />
+            </Route>
+            <Route path="/help-center" element={<UnderConstruction />} />
+            <Route path="/contact" element={<UnderConstruction />} />
+            <Route path="/release-notes" element={<UnderConstruction />} />
           </Route>
         </Route>
 
